@@ -20,6 +20,13 @@ public class MainActivity extends AppCompatActivity {
     private SectionsPageAdapter mSectionsPageAdapter;
     private ViewPager mViewPager;
 
+    private LinearLayout mFabMapNormalLayout;
+    private LinearLayout mFabMapHybridLayout;
+    private LinearLayout mFabMapTerrainLayout;
+    private LinearLayout mFabMapSatelliteLayout;
+
+    private boolean fabExpanded = false;
+    private FloatingActionButton fabSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,28 +36,65 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         setupViewPager(mViewPager);
-//
+
+        //Sets the tab layout to the maps Fragment
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
         TabLayout.Tab tab = tabLayout.getTabAt(1);
         tab.select();
 
+        //Finds the layouts for fab action menu
+        mFabMapNormalLayout = (LinearLayout) findViewById(R.id.layoutFabNormal);
+        mFabMapHybridLayout= (LinearLayout) findViewById(R.id.layoutFabHybrid);
+        mFabMapTerrainLayout= (LinearLayout) findViewById(R.id.layoutFabTerrain);
+        mFabMapSatelliteLayout = (LinearLayout) findViewById(R.id.layoutFabSatellite);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Current Location...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
         }
         });
+        fab.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (fabExpanded == true){
+                    closeSubMenusFab();
+                } else {
+                    openSubMenusFab();
+                }
+                return false;
+            }
+        });
+
+        closeSubMenusFab();
     }
 
+    private void closeSubMenusFab(){
+        mFabMapNormalLayout.setVisibility(View.INVISIBLE);
+        mFabMapHybridLayout.setVisibility(View.INVISIBLE);
+        mFabMapTerrainLayout.setVisibility(View.INVISIBLE);
+        mFabMapSatelliteLayout.setVisibility(View.INVISIBLE);
 
+//        fabSettings.setImageResource(R.drawable.ic_settings_black_24dp);
+        fabExpanded = false;
+    }
+
+    //Opens FAB submenus
+    private void openSubMenusFab(){
+        mFabMapNormalLayout.setVisibility(View.VISIBLE);
+        mFabMapHybridLayout.setVisibility(View.VISIBLE);
+        mFabMapTerrainLayout.setVisibility(View.VISIBLE);
+        mFabMapSatelliteLayout.setVisibility(View.VISIBLE);
+        //Change settings icon to 'X' icon
+//        fabSettings.setImageResource(R.drawable.ic_close_black_24dp);
+        fabExpanded = true;
+    }
 
 
     private void setupViewPager(ViewPager viewPager) {
@@ -84,4 +128,8 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void closeMenus(View view) {
+        if(fabExpanded)
+            closeSubMenusFab();
+    }
 }
