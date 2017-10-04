@@ -57,7 +57,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="10dp"
-                android:onClick="onFabMenuItemSelected"
                 android:src="@drawable/mapt1"
                 app:backgroundTint="@color/lightBlueGrey"
                 app:fabSize="mini"/>
@@ -110,8 +109,7 @@
                 android:layout_marginRight="10dp"
                 android:src="@drawable/mapt4"
                 app:backgroundTint="@color/lightBlueGrey"
-                app:fabSize="mini"
-                android:onClick="onFabMenuItemSelected"/>
+                app:fabSize="mini"/>
 
         </LinearLayout>
 
@@ -160,7 +158,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="10dp"
-                android:onClick="onFabMenuItemSelected"
                 android:src="@drawable/mapt3"
                 app:backgroundTint="@color/lightBlueGrey"
                 app:fabSize="mini"/>
@@ -212,8 +209,7 @@
                 android:layout_marginRight="10dp"
                 android:src="@drawable/mapt5"
                 app:backgroundTint="@color/lightBlueGrey"
-                app:fabSize="mini"
-                android:onClick="onFabMenuItemSelected"/>
+                app:fabSize="mini"/>
 
         </LinearLayout>
     </RelativeLayout>
