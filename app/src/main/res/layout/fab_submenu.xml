@@ -34,7 +34,8 @@
                 app:cardBackgroundColor="@color/cardview_light_background"
                 app:cardCornerRadius="@dimen/cardCornerRadius"
                 app:cardElevation="@dimen/cardElevation"
-                app:cardUseCompatPadding="true">
+                app:cardUseCompatPadding="true"
+                android:alpha=".80">
 
                 <TextView
                     android:id="@+id/cvNormal"
@@ -55,10 +56,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="10dp"
-                android:src="@drawable/common_full_open_on_phone"
+                android:onClick="onFabMenuItemSelected"
+                android:src="@drawable/mapt1"
                 app:backgroundTint="@color/lightBlueGrey"
-                app:fabSize="mini"
-                android:onClick="onFabMenuItemSelected"/>
+                app:fabSize="mini"/>
 
         </LinearLayout>
 
@@ -83,7 +84,8 @@
                 app:cardBackgroundColor="@color/cardview_light_background"
                 app:cardCornerRadius="@dimen/cardCornerRadius"
                 app:cardElevation="@dimen/cardElevation"
-                app:cardUseCompatPadding="true">
+                app:cardUseCompatPadding="true"
+                android:alpha=".80">
 
                 <TextView
                     android:id="@+id/cvHybrid"
@@ -104,7 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="10dp"
-                android:src="@drawable/common_full_open_on_phone"
+                android:src="@drawable/mapt4"
                 app:backgroundTint="@color/lightBlueGrey"
                 app:fabSize="mini"
                 android:onClick="onFabMenuItemSelected"/>
@@ -133,7 +135,8 @@
                 app:cardBackgroundColor="@color/cardview_light_background"
                 app:cardCornerRadius="@dimen/cardCornerRadius"
                 app:cardElevation="@dimen/cardElevation"
-                app:cardUseCompatPadding="true">
+                app:cardUseCompatPadding="true"
+                android:alpha=".80">
 
                 <TextView
                     android:id="@+id/cvTerrain"
@@ -154,10 +157,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="10dp"
-                android:src="@drawable/common_full_open_on_phone"
+                android:onClick="onFabMenuItemSelected"
+                android:src="@drawable/mapt3"
                 app:backgroundTint="@color/lightBlueGrey"
-                app:fabSize="mini"
-                android:onClick="onFabMenuItemSelected"/>
+                app:fabSize="mini"/>
 
         </LinearLayout>
 
@@ -181,7 +184,8 @@
                 app:cardBackgroundColor="@color/cardview_light_background"
                 app:cardCornerRadius="@dimen/cardCornerRadius"
                 app:cardElevation="@dimen/cardElevation"
-                app:cardUseCompatPadding="true">
+                app:cardUseCompatPadding="true"
+                android:alpha=".80">
 
                 <TextView
                     android:id="@+id/cvSatellite"
@@ -202,7 +206,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="10dp"
-                android:src="@drawable/common_full_open_on_phone"
+                android:src="@drawable/mapt5"
                 app:backgroundTint="@color/lightBlueGrey"
                 app:fabSize="mini"
                 android:onClick="onFabMenuItemSelected"/>

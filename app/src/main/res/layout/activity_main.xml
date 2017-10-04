@@ -45,11 +45,40 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+        app:backgroundTint="@color/darkBlue"
+        app:srcCompat="@drawable/mapt2" />
 
 
-    <include layout="@layout/fab_submenu" />
+    <include layout="@layout/fab_submenu"
+        android:id="@+id/include" />
 
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_current_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|right"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            android:alpha=".55"
+            app:backgroundTint="?attr/colorButtonNormal"
+            app:elevation="5dp"
+            app:fabSize="normal"
+            app:layout_anchorGravity="bottom|left"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0.024"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.984"
+            app:rippleColor="@android:color/transparent"
+            app:srcCompat="@drawable/locationicon" />
+    </android.support.constraint.ConstraintLayout>
 
 
 

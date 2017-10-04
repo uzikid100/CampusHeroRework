@@ -70,11 +70,19 @@ public class MainActivity extends AppCompatActivity {
         fabTerrain = (FloatingActionButton) findViewById(R.id.fabMapTerrain);
         fabSatellite= (FloatingActionButton) findViewById(R.id.fabMapSatellite);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton fabLocation = (FloatingActionButton) findViewById(R.id.fab_current_location);
+        fabLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMapFragment.goToCurrentLocation();
+            }
+        });
+
+
+        FloatingActionButton fabMapType = (FloatingActionButton) findViewById(R.id.fab);
+        fabMapType.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                mMapFragment.goToCurrentLocation();
                 if (fabExpanded == true){
                     closeSubMenusFab();
                 } else {
@@ -82,18 +90,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 }
             });
-//        fab.setOnLongClickListener(new View.OnLongClickListener() {
-//                @Override
-//                public boolean onLongClick(View v) {
-//                    if (fabExpanded == true){
-//                    closeSubMenusFab();
-//                } else {
-//                    openSubMenusFab();
-//                }
-//                return false;
-//            }
-//        });
-
         closeSubMenusFab();
     }
 
