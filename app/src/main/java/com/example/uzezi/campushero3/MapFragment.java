@@ -44,7 +44,9 @@ public class MapFragment extends Fragment
     }
 
     public void goToCurrentLocation(){
-
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, ZOOM));
+        mMap.addMarker(new MarkerOptions().position(DEFAULT_LOCATION)
+                .title("You"));
     }
 
 
@@ -59,18 +61,32 @@ public class MapFragment extends Fragment
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        goToCurrentLocation();
 
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, ZOOM));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, ZOOM));
-        mMap.addMarker(new MarkerOptions().position(DEFAULT_LOCATION)
-                .title("You"));
+    }
+
+    public void ChangeMapType(int type){
+        switch (type) {
+            case GoogleMap.MAP_TYPE_NORMAL:
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                break;
+            case GoogleMap.MAP_TYPE_HYBRID:
+                mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                break;
+            case GoogleMap.MAP_TYPE_TERRAIN:
+                mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                break;
+            case GoogleMap.MAP_TYPE_SATELLITE:
+                mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                break;
+        }
     }
 
 
     @Override
     public void onPoiClick(PointOfInterest poi) {
 
-        Toast.makeText(this.getContext(), "Clicked: " +
+        Toast.makeText(getActivity().getApplicationContext(), "Clicked: " +
                         poi.name + "\nPlace ID:" + poi.placeId +
                         "\nLatitude:" + poi.latLng.latitude +
                         " Longitude:" + poi.latLng.longitude,

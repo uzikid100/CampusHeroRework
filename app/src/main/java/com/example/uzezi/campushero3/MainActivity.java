@@ -1,5 +1,6 @@
 package com.example.uzezi.campushero3;
 
+import android.icu.text.DisplayContext;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -13,12 +14,17 @@ import android.view.MenuItem;
 import android.view.View;
 
 import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import com.google.android.gms.maps.GoogleMap;
 
 public class MainActivity extends AppCompatActivity {
 
 
     private SectionsPageAdapter mSectionsPageAdapter;
     private ViewPager mViewPager;
+
+    private MapFragment mMapFragment;
 
     private LinearLayout mFabMapNormalLayout;
     private LinearLayout mFabMapHybridLayout;
@@ -27,6 +33,11 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean fabExpanded = false;
     private FloatingActionButton fabSettings;
+
+    private FloatingActionButton fabNormal;
+    private FloatingActionButton fabHybrid;
+    private FloatingActionButton fabTerrain;
+    private FloatingActionButton fabSatellite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,25 +63,36 @@ public class MainActivity extends AppCompatActivity {
         mFabMapTerrainLayout= (LinearLayout) findViewById(R.id.layoutFabTerrain);
         mFabMapSatelliteLayout = (LinearLayout) findViewById(R.id.layoutFabSatellite);
 
+
+        //Gets references to the Fabs in Menu
+        fabNormal = (FloatingActionButton) findViewById(R.id.fabMapNormal);
+        fabHybrid = (FloatingActionButton) findViewById(R.id.fabMapHybrid);
+        fabTerrain = (FloatingActionButton) findViewById(R.id.fabMapTerrain);
+        fabSatellite= (FloatingActionButton) findViewById(R.id.fabMapSatellite);
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Current Location...", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-        }
-        });
-        fab.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
+//                mMapFragment.goToCurrentLocation();
                 if (fabExpanded == true){
                     closeSubMenusFab();
                 } else {
                     openSubMenusFab();
                 }
-                return false;
-            }
-        });
+                }
+            });
+//        fab.setOnLongClickListener(new View.OnLongClickListener() {
+//                @Override
+//                public boolean onLongClick(View v) {
+//                    if (fabExpanded == true){
+//                    closeSubMenusFab();
+//                } else {
+//                    openSubMenusFab();
+//                }
+//                return false;
+//            }
+//        });
 
         closeSubMenusFab();
     }
@@ -98,9 +120,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void setupViewPager(ViewPager viewPager) {
+        mMapFragment = new MapFragment();
         SectionsPageAdapter adapter = new SectionsPageAdapter(getSupportFragmentManager());
         adapter.addFragment(new ProfileFragment(), "Profile");
-        adapter.addFragment(new MapFragment(), "Campus Map");
+        adapter.addFragment(mMapFragment, "Campus Map");
         adapter.addFragment(new ProfileFragment(), "Points Of Interest");
         viewPager.setAdapter(adapter);
     }
@@ -128,8 +151,30 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void onFabMenuItemSelected(View view) {
+        try{
+            final FloatingActionButton fab = (FloatingActionButton) view;
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(fab.getId() == fabNormal.getId())
+                        mMapFragment.ChangeMapType(GoogleMap.MAP_TYPE_NORMAL);
+                    if(fab.getId() == fabHybrid.getId())
+                        mMapFragment.ChangeMapType(GoogleMap.MAP_TYPE_HYBRID);
+                    if(fab.getId() == fabTerrain.getId())
+                        mMapFragment.ChangeMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                    if(fab.getId() == fabSatellite.getId())
+                        mMapFragment.ChangeMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                    if(fabExpanded == true) closeSubMenusFab();
+                }
+            });
+        }catch (ClassCastException e){}
+    }
+
     public void closeMenus(View view) {
         if(fabExpanded)
             closeSubMenusFab();
     }
+
+
 }
