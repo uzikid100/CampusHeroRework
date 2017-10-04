@@ -39,6 +39,13 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton fabTerrain;
     private FloatingActionButton fabSatellite;
 
+    private TabLayout.Tab mMapTab;
+    private TabLayout.Tab mProfileTab;
+    private TabLayout.Tab mPoiTab;
+
+    private FloatingActionButton mFabLocation;
+    private FloatingActionButton mFabMapType;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,11 +58,15 @@ public class MainActivity extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.container);
         setupViewPager(mViewPager);
 
+
         //Sets the tab layout to the maps Fragment
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
-        TabLayout.Tab tab = tabLayout.getTabAt(1);
-        tab.select();
+        mProfileTab = tabLayout.getTabAt(0);
+        mMapTab = tabLayout.getTabAt(1);
+        mPoiTab = tabLayout.getTabAt(2);
+        mMapTab.select();
+
 
         //Finds the layouts for fab action menu
         mFabMapNormalLayout = (LinearLayout) findViewById(R.id.layoutFabNormal);
@@ -70,8 +81,8 @@ public class MainActivity extends AppCompatActivity {
         fabTerrain = (FloatingActionButton) findViewById(R.id.fabMapTerrain);
         fabSatellite= (FloatingActionButton) findViewById(R.id.fabMapSatellite);
 
-        FloatingActionButton fabLocation = (FloatingActionButton) findViewById(R.id.fab_current_location);
-        fabLocation.setOnClickListener(new View.OnClickListener() {
+        mFabLocation = (FloatingActionButton) findViewById(R.id.fab_current_location);
+        mFabLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mMapFragment.goToCurrentLocation();
@@ -79,8 +90,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        FloatingActionButton fabMapType = (FloatingActionButton) findViewById(R.id.fab);
-        fabMapType.setOnClickListener(new View.OnClickListener() {
+        mFabMapType = (FloatingActionButton) findViewById(R.id.fab);
+        mFabMapType.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (fabExpanded == true){
@@ -91,6 +102,38 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         closeSubMenusFab();
+
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if(tab == mMapTab){
+                    enableFabs();
+                }else{
+                    disableFabs();
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
+    }
+
+    private void disableFabs(){
+        mFabLocation.setVisibility(View.INVISIBLE);
+        mFabMapType.setVisibility(View.INVISIBLE);
+    }
+
+    private void enableFabs(){
+        mFabLocation.setVisibility(View.VISIBLE);
+        mFabMapType.setVisibility(View.VISIBLE);
     }
 
     private void closeSubMenusFab(){
@@ -153,24 +196,18 @@ public class MainActivity extends AppCompatActivity {
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(fab.getId() == fabNormal.getId())
+                    int id = fab.getId();
+                    if(id == fabNormal.getId())
                         mMapFragment.ChangeMapType(GoogleMap.MAP_TYPE_NORMAL);
-                    if(fab.getId() == fabHybrid.getId())
+                    if(id == fabHybrid.getId())
                         mMapFragment.ChangeMapType(GoogleMap.MAP_TYPE_HYBRID);
-                    if(fab.getId() == fabTerrain.getId())
+                    if(id == fabTerrain.getId())
                         mMapFragment.ChangeMapType(GoogleMap.MAP_TYPE_TERRAIN);
-                    if(fab.getId() == fabSatellite.getId())
+                    if(id == fabSatellite.getId())
                         mMapFragment.ChangeMapType(GoogleMap.MAP_TYPE_SATELLITE);
                     if(fabExpanded == true) closeSubMenusFab();
                 }
             });
         }catch (ClassCastException e){}
     }
-
-    public void closeMenus(View view) {
-        if(fabExpanded)
-            closeSubMenusFab();
-    }
-
-
 }

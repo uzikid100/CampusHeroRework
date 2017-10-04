@@ -35,7 +35,8 @@
                 app:cardCornerRadius="@dimen/cardCornerRadius"
                 app:cardElevation="@dimen/cardElevation"
                 app:cardUseCompatPadding="true"
-                android:alpha=".80">
+                android:alpha=".80"
+                android:visibility="invisible">
 
                 <TextView
                     android:id="@+id/cvNormal"
@@ -85,7 +86,8 @@
                 app:cardCornerRadius="@dimen/cardCornerRadius"
                 app:cardElevation="@dimen/cardElevation"
                 app:cardUseCompatPadding="true"
-                android:alpha=".80">
+                android:alpha=".80"
+                android:visibility="invisible">
 
                 <TextView
                     android:id="@+id/cvHybrid"
@@ -136,7 +138,8 @@
                 app:cardCornerRadius="@dimen/cardCornerRadius"
                 app:cardElevation="@dimen/cardElevation"
                 app:cardUseCompatPadding="true"
-                android:alpha=".80">
+                android:alpha=".80"
+                android:visibility="invisible">
 
                 <TextView
                     android:id="@+id/cvTerrain"
@@ -185,7 +188,8 @@
                 app:cardCornerRadius="@dimen/cardCornerRadius"
                 app:cardElevation="@dimen/cardElevation"
                 app:cardUseCompatPadding="true"
-                android:alpha=".80">
+                android:alpha=".80"
+                android:visibility="invisible">
 
                 <TextView
                     android:id="@+id/cvSatellite"
