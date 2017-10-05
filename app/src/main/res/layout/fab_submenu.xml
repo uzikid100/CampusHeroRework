@@ -59,7 +59,8 @@
                 android:layout_marginRight="10dp"
                 android:src="@drawable/mapt1"
                 app:backgroundTint="@color/lightBlueGrey"
-                app:fabSize="mini"/>
+                app:fabSize="mini"
+                android:alpha=".9"/>
 
         </LinearLayout>
 
@@ -109,7 +110,8 @@
                 android:layout_marginRight="10dp"
                 android:src="@drawable/mapt4"
                 app:backgroundTint="@color/lightBlueGrey"
-                app:fabSize="mini"/>
+                app:fabSize="mini"
+                android:alpha=".9"/>
 
         </LinearLayout>
 
@@ -160,7 +162,8 @@
                 android:layout_marginRight="10dp"
                 android:src="@drawable/mapt3"
                 app:backgroundTint="@color/lightBlueGrey"
-                app:fabSize="mini"/>
+                app:fabSize="mini"
+                android:alpha=".9"/>
 
         </LinearLayout>
 
@@ -209,7 +212,8 @@
                 android:layout_marginRight="10dp"
                 android:src="@drawable/mapt5"
                 app:backgroundTint="@color/lightBlueGrey"
-                app:fabSize="mini"/>
+                app:fabSize="mini"
+                android:alpha=".9"/>
 
         </LinearLayout>
     </RelativeLayout>

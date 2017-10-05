@@ -26,6 +26,8 @@
 
         <!--</android.support.v7.widget.Toolbar>-->
 
+        <include layout="@layout/searchbar" />
+
         <ImageView
             android:id="@+id/superman_login_image"
             android:layout_width="250dp"
@@ -55,7 +57,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="@dimen/fab_margin"
-        app:backgroundTint="@color/darkBlue"
+        android:alpha=".90"
+        app:backgroundTint="@color/lightGreen"
         app:srcCompat="@drawable/mapt2" />
 
 

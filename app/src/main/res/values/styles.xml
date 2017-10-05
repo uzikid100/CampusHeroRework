@@ -6,7 +6,7 @@
         <!--<item name="colorPrimary">@color/colorPrimary</item>-->
         <!--<item name="colorPrimaryDark">@color/colorPrimaryDark</item>-->
         <!--<item name="colorAccent">@color/colorAccent</item>-->
-        <item name="colorPrimary">@color/red</item>
+        <item name="colorPrimary">@color/lightBlueGrey</item>
         <item name="colorPrimaryDark">@color/samfordBlue</item>
         <item name="colorAccent">@color/lightBlueGrey</item>
 
