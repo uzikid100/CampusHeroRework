@@ -22,8 +22,8 @@
         completions."
     </string>
 
-    <string name="login">Login</string>
-    <string name="create_new_account">Don\'t have an account yet? Sign Up.</string>
+    <string name="sign_up">Don\'t have an account yet? Sign Up.</string>
+    <string name="login">Already have an account? Login.</string>
 
     <string name="map_type_normal">Normal</string>
     <string name="map_type_terrain">Terrain</string>
