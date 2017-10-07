@@ -1,5 +1,6 @@
 package com.example.uzezi.campushero3;
 
+import android.content.Context;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +15,7 @@ import android.view.View;
 
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 
@@ -44,7 +46,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TabLayout.Tab mMapTab;
     private TabLayout.Tab mProfileTab;
     private TabLayout.Tab mPoiTab;
-
 
 
     @Override

@@ -1,5 +1,6 @@
 package com.example.uzezi.campushero3;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,9 +23,14 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PointOfInterest;
 
+import java.util.Map;
 
+//
+//TODO implement google 'PlacesService', 'DirectionService,' and 'DirectionRenderer'
+//research google.maps.infowindow
+//
 public class MapFragment extends Fragment
-        implements OnMapReadyCallback, GoogleMap.OnPoiClickListener{
+        implements OnMapReadyCallback{
 
     private GoogleMap mMap;
     private final LatLng DEFAULT_LOCATION = new LatLng(33.465004, -86.790231);
@@ -81,16 +87,5 @@ public class MapFragment extends Fragment
                 mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
                 break;
         }
-    }
-
-
-    @Override
-    public void onPoiClick(PointOfInterest poi) {
-
-        Toast.makeText(getActivity().getApplicationContext(), "Clicked: " +
-                        poi.name + "\nPlace ID:" + poi.placeId +
-                        "\nLatitude:" + poi.latLng.latitude +
-                        " Longitude:" + poi.latLng.longitude,
-                Toast.LENGTH_SHORT).show();
     }
 }

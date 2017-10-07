@@ -3,7 +3,7 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="lightBlueGrey">#b0bec5</color>
-    <color name="blueGrey">#607D8B</color>
+    <color name="blueGrey">#607d8b</color>
     <color name="colorAccent">#FF4081</color>
     <color name="red">#f94e42</color>
     <color name="samfordRed">#D32F2F</color>
@@ -18,4 +18,5 @@
     <color name="lightYellow">#fff59d</color>
     <color name="yellow">#ffeb3b</color>
     <color name="yellowOrange">#f9a825</color>
+    <color name="boltYellow">#FDD835</color>
 </resources>
