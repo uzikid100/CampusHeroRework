@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <AutoCompleteTextView
+        android:id="@+id/autoTvFrom"
+        android:layout_width="250dp"
+        android:layout_height="35dp"
+        android:layout_below="@id/autoTvFrom"
+        android:layout_centerHorizontal="true"
+        android:hint="Starting Location"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+    <AutoCompleteTextView
+        android:id="@+id/autoTvTo"
+        android:layout_width="250dp"
+        android:layout_height="35dp"
+        android:layout_below="@id/autoTvFrom"
+        android:hint="Where To?"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:layout_centerHorizontal="true"/>
+
+    <ImageButton
+        android:id="@+id/invertTextButton"
+        style="@android:style/Widget.ImageButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignBottom="@+id/autoTvTo"
+        android:layout_marginBottom="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginRight="12dp"
+        android:layout_toLeftOf="@+id/autoTvFrom"
+        android:layout_toStartOf="@+id/autoTvFrom"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/updownarrow2" />
+        <!--app:srcCompat="@android:drawable/arrow_down_float" -->
+
+    <ImageButton
+        android:id="@+id/searchButton"
+        style="@android:style/Widget.ImageButton"
+        android:layout_width="25dp"
+        android:layout_height="23dp"
+        android:layout_below="@+id/autoTvFrom"
+        android:layout_marginLeft="11dp"
+        android:layout_marginStart="11dp"
+        android:layout_toRightOf="@+id/autoTvTo"
+        android:background="@color/lightYellow"
+        android:elevation="@dimen/cardCornerRadius"
+        android:fadingEdge="horizontal|vertical"
+        android:tint="@color/common_google_signin_btn_text_light_pressed"
+        app:srcCompat="@android:drawable/ic_menu_directions" />
+
+    <ImageButton
+        android:id="@+id/useLocationButton"
+        style="@android:style/Widget.ImageButton"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignEnd="@+id/searchButton"
+        android:layout_alignLeft="@+id/searchButton"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/searchButton"
+        android:layout_alignStart="@+id/searchButton"
+        android:background="@android:color/transparent"
+        android:tint="@color/common_google_signin_btn_text_light_disabled"
+        app:srcCompat="@android:drawable/ic_menu_mylocation" />
+
+</RelativeLayout>
