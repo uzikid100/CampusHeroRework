@@ -3,16 +3,14 @@ package com.example.uzezi.campushero3;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.w3c.dom.Text;
 
 /**
  * Created by uzezi on 10/6/2017.
@@ -27,7 +25,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private TextView mSignUpTV;
     private TextView mLoginTv;
 
-    private boolean mExistingUser = false;
+    private boolean mExistingUser = true;
 
 
     //TODO required fields missing depending on new/existing user
@@ -46,7 +44,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mLoginTv = (TextView) findViewById(R.id.login_tv);
     }
 
-    private void createNewUser() {
+    private void setCreateUserUI() {
         mReenterPassword.setVisibility(View.VISIBLE);
         mLogin.setText("Create New Account");
         mSignUpTV.setVisibility(View.INVISIBLE);
@@ -54,7 +52,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mExistingUser = false;
     }
 
-    private void loginExistingUser() {
+    private void setExistingUserUI() {
         mReenterPassword.setVisibility(View.GONE);
         mLogin.setText("Login");
         mSignUpTV.setVisibility(View.VISIBLE);
@@ -86,24 +84,40 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
+
+    private void loginExistingUser() {
+        startMainActivity();
+    }
+
+    private void createNewUser() {
+//        startMainActivity();
+        AlertDialog dLog = createHeroSelectionDialog();
+        dLog.show();
+    }
+
+    private AlertDialog createHeroSelectionDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(R.layout.hero_selection_dialog);
+        return builder.create();
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.login_tv:
-                loginExistingUser();
+                setExistingUserUI();
                 break;
             case R.id.sign_up_tv:
-                createNewUser();
+                setCreateUserUI();
                 break;
             case R.id.loginButton:
                 //Authentication goes here....
                 if (mExistingUser) {
-                    startMainActivity();
+                    loginExistingUser();
                 } else if (!mExistingUser) {
                     if (validateSamePassword()) {
-                        startMainActivity();
+                        createNewUser();
                     }
-
                 }
                 break;
         }

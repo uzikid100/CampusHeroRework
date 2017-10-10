@@ -1,22 +1,18 @@
 package com.example.uzezi.campushero3;
 
-import android.content.Context;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 
 import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
+import com.example.uzezi.campushero3.Fragments.MapFragment;
+import com.example.uzezi.campushero3.Fragments.POIFragment;
+import com.example.uzezi.campushero3.Fragments.ProfileFragment;
 import com.google.android.gms.maps.GoogleMap;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
