@@ -33,6 +33,7 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PointOfInterest;
 
 //
 //TODO implement google 'PlacesService', 'DirectionService,' and 'DirectionRenderer'
@@ -42,7 +43,8 @@ public class MapFragment extends Fragment
         implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        com.google.android.gms.location.LocationListener {
+        com.google.android.gms.location.LocationListener,
+        GoogleMap.OnPoiClickListener{
 
     protected final String TAG = "MapFragment";
 
@@ -57,6 +59,7 @@ public class MapFragment extends Fragment
     private GoogleApiClient mGoogleApiClient;
     private Context mContext;
 
+    private boolean isLocationFabVisible = false;
 
     public MapFragment() {
         // Required empty public constructor
@@ -103,15 +106,17 @@ public class MapFragment extends Fragment
         setMapSettings();
         //TODO check if permission was granted or not
         ///TODO implement here...
-
+//        mMap.setOnCameraIdleListener(onCameraMoved);
+//        mMap.setO
     }
 
 
     private void setMapSettings() {
-        UiSettings uISettings = null;
         if (!mMap.equals(null)) {
-            uISettings = mMap.getUiSettings();
-            uISettings.setAllGesturesEnabled(true);
+            mMap.getUiSettings().setAllGesturesEnabled(true);
+            mMap.getUiSettings().setAllGesturesEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            mMap.setOnPoiClickListener(this); //must explicitly set PoiClickListener to 'this' instance of Google maps
             if (ActivityCompat.checkSelfPermission(this.mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 mMap.setMyLocationEnabled(true);
             }
@@ -119,15 +124,30 @@ public class MapFragment extends Fragment
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Fine_Location_Request_Code);
         }
 
-        //try to setSupportActionBar if I can
-        //uISettings.setMapToolbarEnabled(true);
+        //TODO try to setSupportActionBar if I can
+        //TODO uISettings.setMapToolbarEnabled(true);
         //((AppCompatActivity) getActivity()).setSupportActionBar();
 
     }
 
+    private void onCameraMoved() {
+//        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+//            @Override
+//            public void onCameraMove() {
+//                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+//            }
+//        });
+//
+//        mMap.setOnCameraIdleListener();
+    }
+
+
+
     @Override
     public void onLocationChanged(Location location) {
-        Toast.makeText(mContext, "Hello", Toast.LENGTH_SHORT).show();
+        Toast.makeText(mContext, "onLocationChanged", Toast.LENGTH_SHORT).show();
+
+//        mMap.getUiSettings().setMyLocationButtonEnabled(true);
 //        mLatLng = new LatLng(location.getLatitude(), location.getLongitude());
 //        mMap.moveCamera(CameraUpdateFactory.newLatLng(mLatLng));
     }
@@ -147,6 +167,7 @@ public class MapFragment extends Fragment
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     if (ActivityCompat.checkSelfPermission(this.mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                         mMap.setMyLocationEnabled(true);
+                        mMap.getUiSettings().setMyLocationButtonEnabled(true);
                     }
                 } else {
                     Toast.makeText(mContext, "This app requires location permissions to be granted!", Toast.LENGTH_SHORT).show();
@@ -239,5 +260,10 @@ public class MapFragment extends Fragment
     public void onStop() {
         super.onStop();
         mGoogleApiClient.disconnect();
+    }
+
+    @Override
+    public void onPoiClick(PointOfInterest pointOfInterest) {
+        Toast.makeText(mContext, "pointOfInterest.name", Toast.LENGTH_SHORT).show();
     }
 }
