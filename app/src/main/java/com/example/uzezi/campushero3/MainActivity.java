@@ -72,14 +72,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //Gets references to the Fabs in Menu
         mFabMapType = (FloatingActionButton) findViewById(R.id.fabMapType);
+
+        //button disabled
         mFabLocation = (FloatingActionButton) findViewById(R.id.fabLocation);
+        mFabLocation.setVisibility(View.GONE);
+
         fabNormal = (FloatingActionButton) findViewById(R.id.fabMapNormal);
         fabHybrid = (FloatingActionButton) findViewById(R.id.fabMapHybrid);
         fabTerrain = (FloatingActionButton) findViewById(R.id.fabMapTerrain);
         fabSatellite= (FloatingActionButton) findViewById(R.id.fabMapSatellite);
 
         mFabMapType.setOnClickListener(this);
-        mFabLocation.setOnClickListener(this);
+//        mFabLocation.setOnClickListener(this);
         fabNormal.setOnClickListener(this);
         fabHybrid.setOnClickListener(this);
         fabTerrain.setOnClickListener(this);
@@ -182,8 +186,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if(fabExpanded) {closeSubMenusFab();}
                   else {openSubMenusFab();}
                 break;
-            case R.id.fabLocation:
-                mMapFragment.goToCurrentLocation();
+//            case R.id.fabLocation:
+//                mMapFragment.goToCurrentLocation();
             case R.id.fabMapNormal:
                 mMapFragment.ChangeMapType(GoogleMap.MAP_TYPE_NORMAL);
                 if(fabExpanded) {closeSubMenusFab();}

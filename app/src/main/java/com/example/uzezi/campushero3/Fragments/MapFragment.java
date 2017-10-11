@@ -18,8 +18,10 @@ import android.widget.Toast;
 import com.example.uzezi.campushero3.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderApi;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Places;
@@ -27,6 +29,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -38,20 +42,21 @@ public class MapFragment extends Fragment
         implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        com.google.android.gms.location.LocationListener{
+        com.google.android.gms.location.LocationListener {
 
     protected final String TAG = "MapFragment";
 
     private GoogleMap mMap;
-    private final LatLng DEFAULT_LOCATION = new LatLng(33.465004, -86.790231);
+    private LatLng DEFAULT_LOCATION = new LatLng(33.465004, -86.790231);
     private final int DEFAULT_ZOOM = 18;
-    private final static int MY_PERMISSION_FINE_LOCATION = 1;
+    private final static int Fine_Location_Request_Code = 1; //arbitrary #
 
     private LocationRequest mLocationRequest;
-    private FusedLocationProviderApi mProvider = LocationServices.FusedLocationApi;
+    private Location mLastKnownLocation;
+    private FusedLocationProviderApi mFusedLocationApi;
     private GoogleApiClient mGoogleApiClient;
     private Context mContext;
-    private LatLng mLatLng = new LatLng(100, 200);
+
 
     public MapFragment() {
         // Required empty public constructor
@@ -64,6 +69,7 @@ public class MapFragment extends Fragment
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        mFusedLocationApi = LocationServices.FusedLocationApi;
         mContext = this.getActivity().getApplicationContext();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this.getActivity().getApplicationContext())
@@ -80,6 +86,7 @@ public class MapFragment extends Fragment
         mLocationRequest.setFastestInterval(1000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
+
     }
 
     @Override
@@ -93,11 +100,29 @@ public class MapFragment extends Fragment
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        if (ActivityCompat.checkSelfPermission(this.mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
+        setMapSettings();
+        //TODO check if permission was granted or not
+        ///TODO implement here...
+
+    }
+
+
+    private void setMapSettings() {
+        UiSettings uISettings = null;
+        if (!mMap.equals(null)) {
+            uISettings = mMap.getUiSettings();
+            uISettings.setAllGesturesEnabled(true);
+            if (ActivityCompat.checkSelfPermission(this.mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                mMap.setMyLocationEnabled(true);
+            }
         } else {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_FINE_LOCATION);
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Fine_Location_Request_Code);
         }
+
+        //try to setSupportActionBar if I can
+        //uISettings.setMapToolbarEnabled(true);
+        //((AppCompatActivity) getActivity()).setSupportActionBar();
+
     }
 
     @Override
@@ -108,15 +133,17 @@ public class MapFragment extends Fragment
     }
 
     public void goToCurrentLocation() {
+        //TODO remember to undo FAB click in getActivity();
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, DEFAULT_ZOOM));
         mMap.addMarker(new MarkerOptions().position(DEFAULT_LOCATION)
                 .title("You"));
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
-            case MY_PERMISSION_FINE_LOCATION:
+            case Fine_Location_Request_Code:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     if (ActivityCompat.checkSelfPermission(this.mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                         mMap.setMyLocationEnabled(true);
@@ -146,9 +173,28 @@ public class MapFragment extends Fragment
         }
     }
 
+    //Used to request locationUpdates from the GoogleApiClient
     private void requestLocationUpdates() {
+        PendingResult<Status> resultStatus;
         if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            resultStatus = LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            resultStatus.setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onResult(@NonNull Status status) {
+                    if (status.isSuccess()) {
+                        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
+                            mLastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+                        }
+                        //set currentLocation on UI
+                        if (mLastKnownLocation != null) {
+                            LatLng ll = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ll, DEFAULT_ZOOM));
+                            mMap.addCircle(new CircleOptions().center(ll)).setVisible(true);
+
+                        }
+                    }
+                }
+            });
         }
     }
 
