@@ -50,7 +50,7 @@ public class MapFragment extends Fragment
 
     private GoogleMap mMap;
     private LatLng DEFAULT_LOCATION = new LatLng(33.465004, -86.790231);
-    private final int DEFAULT_ZOOM = 18;
+    private final int DEFAULT_ZOOM = 15;
     private final static int Fine_Location_Request_Code = 1; //arbitrary #
 
     private LocationRequest mLocationRequest;
@@ -104,8 +104,8 @@ public class MapFragment extends Fragment
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         setMapSettings();
+        goToCurrentLocation();
         //TODO check if permission was granted or not
-        ///TODO implement here...
 //        mMap.setOnCameraIdleListener(onCameraMoved);
 //        mMap.setO
     }
@@ -114,7 +114,7 @@ public class MapFragment extends Fragment
     private void setMapSettings() {
         if (!mMap.equals(null)) {
             mMap.getUiSettings().setAllGesturesEnabled(true);
-            mMap.getUiSettings().setAllGesturesEnabled(true);
+            mMap.getUiSettings().setMapToolbarEnabled(false);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
             mMap.setOnPoiClickListener(this); //must explicitly set PoiClickListener to 'this' instance of Google maps
             if (ActivityCompat.checkSelfPermission(this.mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -146,17 +146,21 @@ public class MapFragment extends Fragment
     @Override
     public void onLocationChanged(Location location) {
         Toast.makeText(mContext, "onLocationChanged", Toast.LENGTH_SHORT).show();
-
-//        mMap.getUiSettings().setMyLocationButtonEnabled(true);
-//        mLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(mLatLng));
     }
 
     public void goToCurrentLocation() {
         //TODO remember to undo FAB click in getActivity();
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, DEFAULT_ZOOM));
-        mMap.addMarker(new MarkerOptions().position(DEFAULT_LOCATION)
-                .title("You"));
+        if (mLastKnownLocation != null) {
+            LatLng ll = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ll, DEFAULT_ZOOM));
+            mMap.addMarker(new MarkerOptions().position(ll)
+                    .title("You"));
+        }
+//        else{
+//            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, DEFAULT_ZOOM));
+//            mMap.addMarker(new MarkerOptions().position(DEFAULT_LOCATION)
+//                    .title("You")) ;
+//        }
     }
 
     @Override
@@ -206,13 +210,7 @@ public class MapFragment extends Fragment
                         if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
                             mLastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
                         }
-                        //set currentLocation on UI
-                        if (mLastKnownLocation != null) {
-                            LatLng ll = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ll, DEFAULT_ZOOM));
-                            mMap.addCircle(new CircleOptions().center(ll)).setVisible(true);
-
-                        }
+                        goToCurrentLocation();
                     }
                 }
             });
@@ -264,6 +262,6 @@ public class MapFragment extends Fragment
 
     @Override
     public void onPoiClick(PointOfInterest pointOfInterest) {
-        Toast.makeText(mContext, "pointOfInterest.name", Toast.LENGTH_SHORT).show();
+        Toast.makeText(mContext, pointOfInterest.name, Toast.LENGTH_SHORT).show();
     }
 }

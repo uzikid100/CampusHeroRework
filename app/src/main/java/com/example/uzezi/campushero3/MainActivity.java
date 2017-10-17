@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Gets references to the Fabs in Menu
         mFabMapType = (FloatingActionButton) findViewById(R.id.fabMapType);
 
-        //button disabled
+        //button permamently disabled
         mFabLocation = (FloatingActionButton) findViewById(R.id.fabLocation);
         mFabLocation.setVisibility(View.GONE);
 
@@ -115,12 +115,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }////////End of OnCreate////////
 
     private void disableFabs(){
-        mFabLocation.setVisibility(View.INVISIBLE);
+//        mFabLocation.setVisibility(View.INVISIBLE);
         mFabMapType.setVisibility(View.INVISIBLE);
     }
 
     private void enableFabs(){
-        mFabLocation.setVisibility(View.VISIBLE);
+//        mFabLocation.setVisibility(View.VISIBLE);
         mFabMapType.setVisibility(View.VISIBLE);
     }
 

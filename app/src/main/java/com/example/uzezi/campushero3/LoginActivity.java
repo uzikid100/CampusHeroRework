@@ -16,7 +16,7 @@ import android.widget.Toast;
  * Created by uzezi on 10/6/2017.
  */
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener{
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
     private EditText mEmail;
     private EditText mPassword;
@@ -24,6 +24,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private Button mLogin;
     private TextView mSignUpTV;
     private TextView mLoginTv;
+
+    private AlertDialog mAlertDialog;
 
     private boolean mExistingUser = true;
 
@@ -84,6 +86,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
+    private void authenticateUser() {
+    }
 
     private void loginExistingUser() {
         startMainActivity();
@@ -91,8 +95,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private void createNewUser() {
 //        startMainActivity();
-        AlertDialog dLog = createHeroSelectionDialog();
-        dLog.show();
+        mAlertDialog = createHeroSelectionDialog();
+        mAlertDialog.show();
     }
 
     private AlertDialog createHeroSelectionDialog() {
@@ -111,7 +115,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 setCreateUserUI();
                 break;
             case R.id.loginButton:
-                //Authentication goes here....
+                //TODO Authentication goes here....
+                //create and call seperation method from here
+                authenticateUser();
+
                 if (mExistingUser) {
                     loginExistingUser();
                 } else if (!mExistingUser) {
@@ -120,6 +127,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     }
                 }
                 break;
+            case R.id.cancel_dialog_button:
+                mAlertDialog.cancel();
+                break;
+            case R.id.ok_dialog_button:
+                //Check if they have selected a champ then close Dialog
+                mAlertDialog.cancel();
+                break;
         }
     }
+
+
 }
