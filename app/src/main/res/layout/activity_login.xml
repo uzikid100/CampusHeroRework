@@ -72,6 +72,15 @@
             android:inputType="textPersonName"
             android:textSize="15dp" />
 
+        <TextView
+            android:id="@+id/errorInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="24dp"
+            android:text="TextView" />
+
         <EditText
             android:id="@+id/password_editText"
             style="@android:style/Widget.EditText"
