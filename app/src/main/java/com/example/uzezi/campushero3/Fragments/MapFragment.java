@@ -118,11 +118,11 @@ public class MapFragment extends Fragment
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
             mMap.setOnPoiClickListener(this); //must explicitly set PoiClickListener to 'this' instance of Google maps
         }
-            if (ActivityCompat.checkSelfPermission(this.mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                mMap.setMyLocationEnabled(true);
-            }
-             else {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Fine_Location_Request_Code);
+        if (ActivityCompat.checkSelfPermission(this.mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        }
+        else {
+        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Fine_Location_Request_Code);
         }
 
         //TODO try to setSupportActionBar if I can

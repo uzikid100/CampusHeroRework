@@ -1,4 +1,4 @@
-package com.example.uzezi.campushero3;
+package com.example.uzezi.campushero3.Login;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +14,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.uzezi.campushero3.MainActivity;
+import com.example.uzezi.campushero3.R;
+import com.example.uzezi.campushero3.Student;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -46,11 +49,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private Button mLogin;
     private TextView mSignUpTV;
     private TextView mLoginTv;
-    private TextView mErrorInfo;
+
     private MobileServiceClient mClient;
     private MobileServiceTable<Student> mToDoTable;
     private boolean authSuccess = false;
-    private Student item = new Student();
+    private Student mStudent = new Student();
 
     private AlertDialog mAlertDialog;
 
@@ -81,7 +84,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mLogin = (Button) findViewById(R.id.loginButton);
         mSignUpTV = (TextView) findViewById(R.id.sign_up_tv);
         mLoginTv = (TextView) findViewById(R.id.login_tv);
-        mErrorInfo = (TextView) findViewById(R.id.errorInfo);
+//        mErrorInfo = (TextView) findViewById(R.id.errorInfo);
     }
 
     private void setCreateUserUI() {
@@ -125,11 +128,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void authenticateUser() {
-        getItem();
+        authenticateItem();
     }
 
-    private void loginExistingUser() {
-        startMainActivity();
+    private boolean validateUser(boolean existingUser) {
+        return true;
     }
 
     private void createNewUser() {
@@ -154,30 +157,30 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 setCreateUserUI();
                 break;
             case R.id.loginButton:
-                //TODO Authentication goes here....
-                //create and call seperation method from here
-
-                authenticateUser();
-
-                if(authSuccess) {
-                    if (mExistingUser) {
-                        loginExistingUser();
-                    } else if (!mExistingUser) {
-                        if (validateSamePassword()) {
-                            createNewUser();
-                        }
-                    }
-                }else{
-                    mErrorInfo.setText("Username or Password Incorrect.");
+                boolean validated = validateUser(mExistingUser);
+                if (validated && !mExistingUser) {
+                    createNewUser();
                 }
+                else if (validated && mExistingUser) {
+                    authenticateUser();
+                    if (authSuccess) {
 
+                    } else {
+                        reportError("Username or Password Incorrect.");
+                    }
+                    //TODO
+                    // I think we should make 'auhtSuccess' local or a return value of the authenticateUser() method perhaps?
+                    // Thoughts?
+                } else {
+                    reportError("Something was wrong with your entry.");
+                }
                 break;
             case R.id.cancel_dialog_button:
                 mAlertDialog.cancel();
                 break;
             case R.id.ok_dialog_button:
                 //Check if they have selected a champ then close Dialog
-                mAlertDialog.cancel();
+                startMainActivity();
                 break;
         }
     }
@@ -188,17 +191,17 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             return;
         }
 
-        // Create a new item
-        final UserItem item = new UserItem();
+        // Create a new mStudent
+        final UserItem mStudent = new UserItem();
 
-        item.setText(mInsertText.getText().toString());
+        mStudent.setText(mInsertText.getText().toString());
 
-        // Insert the new item
+        // Insert the new mStudent
         AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>(){
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    final UserItem entity = mToDoTable.insert(item).get();
+                    final UserItem entity = mToDoTable.insert(mStudent).get();
 
                     runOnUiThread(new Runnable() {
                         @Override
@@ -218,35 +221,35 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
     */
 
-    private void getItem(){
+    private void authenticateItem(){
         if (mClient == null) {
             authSuccess = false;
             return;
         }
 
-        // Create a new item
-        //final Student item = new Student();
+        // Create a new mStudent
+        //final Student mStudent = new Student();
         final String email = mEmail.getText().toString();
         final String password = mPassword.getText().toString();
 
-        //item.setText(mEmail.getText().toString());
-        //item.setMytext(mPassword.getText().toString());
+        //mStudent.setText(mEmail.getText().toString());
+        //mStudent.setMytext(mPassword.getText().toString());
 
 
-        // Insert the new item
-        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>(){
+        // Insert the new mStudent
+        AsyncTask<Void, Void, Void> authenticate = new AsyncTask<Void, Void, Void>(){
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    final List<Student> entity = mToDoTable.where().field("email").eq(email).execute().get();
+                    final List<Student> students = mToDoTable.where().field("email").eq(email).execute().get();
                     //final List<Student> passwordEntity = mToDoTable.where().field("password").eq(password).execute().get();
 
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if(!entity.isEmpty() && (password.equals(entity.get(0).getMpassword()))){
-                                item = entity.get(0);
+                            if(!students.isEmpty() && (password.equals(students.get(0).getMpassword()))){
+                                mStudent = students.get(0);
                                 authSuccess = true;
                                 //mErrorInfo.setText("Success!");
                             }else{
@@ -263,7 +266,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
         };
 
-        runAsyncTask(task);
+        runAsyncTask(authenticate);
     }
 
     private AsyncTask<Void, Void, Void> runAsyncTask(AsyncTask<Void, Void, Void> task) {
