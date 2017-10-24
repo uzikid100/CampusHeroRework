@@ -18,6 +18,7 @@ import com.example.uzezi.campushero3.MainActivity;
 import com.example.uzezi.campushero3.R;
 import com.example.uzezi.campushero3.Student;
 import com.example.uzezi.campushero3.UiErrorLog;
+import com.google.common.util.concurrent.ExecutionError;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -90,7 +91,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mCreateNewButton = (Button) findViewById(R.id.create_new_button);
         mSignUpTV = (TextView) findViewById(R.id.sign_up_tv);
         mLoginTv = (TextView) findViewById(R.id.login_tv);
-//        mErrorInfo = (TextView) findViewById(R.id.errorInfo);
     }
 
     private void setNewUserUI() {
@@ -111,18 +111,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mExistingUser = true;
     }
 
-    private boolean validateReenterPassword() {
+    private boolean validateReenterPassword() throws Exception {
         String pass = mPassword.getText().toString();
         String passReenter = mReenterPassword.getText().toString();
         if (pass == null || passReenter == null || pass.equals("") || passReenter.equals("")) {
-            mLogger.log(UiErrorLog.LogCode.EMPTY_FIELD);
-            return false;
+            throw new Exception("Password Required");
         }
-        if (pass.matches(passReenter)) {
-            return true;
-        } else {
-            return false;
-        }
+        else if (!pass.matches(passReenter)) {
+            throw new Exception("Passwords Do Not Match");
+        } else return true;
     }
 
     private void startMainActivity() {
@@ -132,38 +129,35 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         startActivity(intent);
     }
 
-    private void reportError(String message) {
-        //TODO: create a seperate class for logging errors
-        //TODO make 'Uilog' global...check if toast is already displayed
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-        mPassword.setText("");
-        mReenterPassword.setText("");
-        mEmail.setText("");
-    }
-
     private void authenticateUser() {
         authenticateItem();
     }
 
     private boolean validateUser(boolean existingUser) {
-        if (!existingUser) {
-            boolean reenterValid = false;
-            reenterValid = validateReenterPassword();
-            if (!reenterValid) {
-                mLogger.log(UiErrorLog.LogCode.PASSWORD_MISMATCH);
-                return false;
+        try {
+            boolean validEmailAndPass = validateEmailAndPass();
+            if (!existingUser) {
+                boolean reenterValid = validateReenterPassword();
+                return validEmailAndPass && reenterValid;
             }
+            return validEmailAndPass;
+        } catch (Exception e) {
+            Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
+            return false;
         }
-        if(validateEmailAndPass())
-            return true;
-        else { return false; }
     }
 
-    private boolean validateEmailAndPass() {
-        //TODO: check for empty/null fields
-        //TODO: check email for special chars '@, .com, .edu'
-        //TODO:
-        return false;
+    private boolean validateEmailAndPass() throws Exception {
+        String pass = mPassword.getText().toString();
+        String email = mEmail.getText().toString();
+
+        if (email.isEmpty() || pass.isEmpty()) {
+            throw new Exception("Email or Password Empty");
+        }
+        else if (!email.contains("@") || !email.contains(".edu") && !email.contains(".com")) {
+            throw new Exception("Invalid Email Address");
+        }
+        else return true;
     }
 
 
@@ -197,28 +191,22 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     if (authSuccess) {
                         startMainActivity();
                     } else {
-                        mLogger.log(UiErrorLog.LogCode.BAD_AUTHENTICATION);
+                        Toast.makeText(mContext, "Authentication Failed", Toast.LENGTH_SHORT).show();
                     }
-                } else {
-                    mLogger.DisplayPending();
                 }
                 break;
             case R.id.create_new_button:
                 validated = validateUser(mExistingUser);
-                //TODO implement validation/authentication for new user
-                startMainActivity();
-//                if (validated) {
-//                    createNewUser();
-//                } else {
-//                    mLogger.DisplayPending();
-//                }
+                if (validated) {
+                    createNewUser();
+                }
                 break;
             case R.id.cancel_dialog_button:
                 if(mAlertDialog.isShowing())
                     mAlertDialog.cancel();
                 break;
             case R.id.ok_dialog_button:
-                //Check if they have selected a champ then close Dialog
+                //TODO: Check if they have selected a champ then close Dialog
                 startMainActivity();
                 break;
         }
