@@ -24,7 +24,11 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.location.places.ui.SupportPlaceAutocompleteFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -72,6 +76,9 @@ public class MapFragment extends Fragment
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        SupportPlaceAutocompleteFragment supportPlaceAutocompleteFragment = (SupportPlaceAutocompleteFragment) getFragmentManager()
+                .findFragmentById(R.id.place_autocomplete_fragment);
+        
         mFusedLocationApi = LocationServices.FusedLocationApi;
         mContext = this.getActivity().getApplicationContext();
 

@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.example.uzezi.campushero3.MainActivity;
 import com.example.uzezi.campushero3.R;
 import com.example.uzezi.campushero3.Student;
+import com.example.uzezi.campushero3.UiErrorLog;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -36,7 +37,6 @@ import java.util.List;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 
 
-
 /**
  * Created by uzezi on 10/6/2017.
  */
@@ -46,7 +46,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText mEmail;
     private EditText mPassword;
     private EditText mReenterPassword;
-    private Button mLogin;
+    private Button mLoginButton;
+    private Button mCreateNewButton;
     private TextView mSignUpTV;
     private TextView mLoginTv;
 
@@ -55,9 +56,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private boolean authSuccess = false;
     private Student mStudent = new Student();
 
+    private Context mContext;
     private AlertDialog mAlertDialog;
-
+    private Toast mUiLog;
     private boolean mExistingUser = true;
+    private UiErrorLog mLogger;
 
 
     //TODO required fields missing depending on new/existing user
@@ -77,41 +80,47 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             e.printStackTrace();
         }
         mToDoTable = mClient.getTable(Student.class);
+        mLogger = new UiErrorLog(getApplicationContext());
+        mContext = this.getApplicationContext();
 
         mEmail = (EditText) findViewById(R.id.email_editText);
         mPassword = (EditText) findViewById(R.id.password_editText);
         mReenterPassword = (EditText) findViewById(R.id.reenter_password_editText);
-        mLogin = (Button) findViewById(R.id.loginButton);
+        mLoginButton = (Button) findViewById(R.id.loginButton);
+        mCreateNewButton = (Button) findViewById(R.id.create_new_button);
         mSignUpTV = (TextView) findViewById(R.id.sign_up_tv);
         mLoginTv = (TextView) findViewById(R.id.login_tv);
 //        mErrorInfo = (TextView) findViewById(R.id.errorInfo);
     }
 
-    private void setCreateUserUI() {
+    private void setNewUserUI() {
         mReenterPassword.setVisibility(View.VISIBLE);
-        mLogin.setText("Create New Account");
+        mCreateNewButton.setVisibility(View.VISIBLE);
         mSignUpTV.setVisibility(View.INVISIBLE);
         mLoginTv.setVisibility(View.VISIBLE);
+        mLoginButton.setVisibility(View.INVISIBLE);
         mExistingUser = false;
     }
 
     private void setExistingUserUI() {
+        mLoginButton.setVisibility(View.VISIBLE);
         mReenterPassword.setVisibility(View.GONE);
-        mLogin.setText("Login");
+        mCreateNewButton.setVisibility(View.GONE);
         mSignUpTV.setVisibility(View.VISIBLE);
         mLoginTv.setVisibility(View.INVISIBLE);
         mExistingUser = true;
     }
 
-    private boolean validateSamePassword() {
+    private boolean validateReenterPassword() {
         String pass = mPassword.getText().toString();
         String passReenter = mReenterPassword.getText().toString();
+        if (pass == null || passReenter == null || pass.equals("") || passReenter.equals("")) {
+            mLogger.log(UiErrorLog.LogCode.EMPTY_FIELD);
+            return false;
+        }
         if (pass.matches(passReenter)) {
             return true;
         } else {
-            mPassword.setText("");
-            mReenterPassword.setText("");
-            reportError("Passwords do not match!");
             return false;
         }
     }
@@ -124,7 +133,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void reportError(String message) {
+        //TODO: create a seperate class for logging errors
+        //TODO make 'Uilog' global...check if toast is already displayed
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        mPassword.setText("");
+        mReenterPassword.setText("");
+        mEmail.setText("");
     }
 
     private void authenticateUser() {
@@ -132,8 +146,26 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private boolean validateUser(boolean existingUser) {
-        return true;
+        if (!existingUser) {
+            boolean reenterValid = false;
+            reenterValid = validateReenterPassword();
+            if (!reenterValid) {
+                mLogger.log(UiErrorLog.LogCode.PASSWORD_MISMATCH);
+                return false;
+            }
+        }
+        if(validateEmailAndPass())
+            return true;
+        else { return false; }
     }
+
+    private boolean validateEmailAndPass() {
+        //TODO: check for empty/null fields
+        //TODO: check email for special chars '@, .com, .edu'
+        //TODO:
+        return false;
+    }
+
 
     private void createNewUser() {
 //        startMainActivity();
@@ -149,34 +181,41 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onClick(View v) {
+        boolean validated = false;
         switch (v.getId()) {
             case R.id.login_tv:
                 setExistingUserUI();
                 break;
             case R.id.sign_up_tv:
-                setCreateUserUI();
+                setNewUserUI();
                 break;
             case R.id.loginButton:
-                boolean validated = validateUser(mExistingUser);
-                if (validated && !mExistingUser) {
-                    createNewUser();
-                }
-                else if (validated && mExistingUser) {
+                validated = validateUser(mExistingUser);
+                if (validated) {
+                    //TODO make 'auhtSuccess' local or a return value of the authenticateUser() method perhaps?
                     authenticateUser();
                     if (authSuccess) {
-
+                        startMainActivity();
                     } else {
-                        reportError("Username or Password Incorrect.");
+                        mLogger.log(UiErrorLog.LogCode.BAD_AUTHENTICATION);
                     }
-                    //TODO
-                    // I think we should make 'auhtSuccess' local or a return value of the authenticateUser() method perhaps?
-                    // Thoughts?
                 } else {
-                    reportError("Something was wrong with your entry.");
+                    mLogger.DisplayPending();
                 }
                 break;
+            case R.id.create_new_button:
+                validated = validateUser(mExistingUser);
+                //TODO implement validation/authentication for new user
+                startMainActivity();
+//                if (validated) {
+//                    createNewUser();
+//                } else {
+//                    mLogger.DisplayPending();
+//                }
+                break;
             case R.id.cancel_dialog_button:
-                mAlertDialog.cancel();
+                if(mAlertDialog.isShowing())
+                    mAlertDialog.cancel();
                 break;
             case R.id.ok_dialog_button:
                 //Check if they have selected a champ then close Dialog
