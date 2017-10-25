@@ -1,6 +1,7 @@
-package com.example.uzezi.campushero3;
+package com.example.uzezi.campushero3.Login;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -14,6 +15,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.uzezi.campushero3.MainActivity;
+import com.example.uzezi.campushero3.R;
+import com.example.uzezi.campushero3.Student;
+import com.example.uzezi.campushero3.UiErrorLog;
+import com.google.common.util.concurrent.ExecutionError;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -33,7 +39,6 @@ import java.util.List;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 
 
-
 /**
  * Created by uzezi on 10/6/2017.
  */
@@ -43,18 +48,21 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText mEmail;
     private EditText mPassword;
     private EditText mReenterPassword;
-    private Button mLogin;
+    private Button mLoginButton;
+    private Button mCreateNewButton;
     private TextView mSignUpTV;
     private TextView mLoginTv;
-    private TextView mErrorInfo;
+
     private MobileServiceClient mClient;
     private MobileServiceTable<Student> mToDoTable;
     private boolean authSuccess = false;
-    private Student item = new Student();
+    private Student mStudent = new Student();
 
+    private Context mContext;
     private AlertDialog mAlertDialog;
-
+    private Toast mToast;
     private boolean mExistingUser = true;
+    private UiErrorLog mLogger;
 
 
     //TODO required fields missing depending on new/existing user
@@ -74,43 +82,45 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             e.printStackTrace();
         }
         mToDoTable = mClient.getTable(Student.class);
+        mLogger = new UiErrorLog(getApplicationContext());
+        mContext = this.getApplicationContext();
 
         mEmail = (EditText) findViewById(R.id.email_editText);
         mPassword = (EditText) findViewById(R.id.password_editText);
         mReenterPassword = (EditText) findViewById(R.id.reenter_password_editText);
-        mLogin = (Button) findViewById(R.id.loginButton);
+        mLoginButton = (Button) findViewById(R.id.loginButton);
+        mCreateNewButton = (Button) findViewById(R.id.create_new_button);
         mSignUpTV = (TextView) findViewById(R.id.sign_up_tv);
         mLoginTv = (TextView) findViewById(R.id.login_tv);
-        mErrorInfo = (TextView) findViewById(R.id.errorInfo);
     }
 
-    private void setCreateUserUI() {
+    private void setNewUserUI() {
         mReenterPassword.setVisibility(View.VISIBLE);
-        mLogin.setText("Create New Account");
+        mCreateNewButton.setVisibility(View.VISIBLE);
         mSignUpTV.setVisibility(View.INVISIBLE);
         mLoginTv.setVisibility(View.VISIBLE);
+        mLoginButton.setVisibility(View.INVISIBLE);
         mExistingUser = false;
     }
 
     private void setExistingUserUI() {
+        mLoginButton.setVisibility(View.VISIBLE);
         mReenterPassword.setVisibility(View.GONE);
-        mLogin.setText("Login");
+        mCreateNewButton.setVisibility(View.GONE);
         mSignUpTV.setVisibility(View.VISIBLE);
         mLoginTv.setVisibility(View.INVISIBLE);
         mExistingUser = true;
     }
 
-    private boolean validateSamePassword() {
+    private boolean validateReenterPassword() throws Exception {
         String pass = mPassword.getText().toString();
         String passReenter = mReenterPassword.getText().toString();
-        if (pass.matches(passReenter)) {
-            return true;
-        } else {
-            mPassword.setText("");
-            mReenterPassword.setText("");
-            reportError("Passwords do not match!");
-            return false;
+        if (pass == null || passReenter == null || pass.equals("") || passReenter.equals("")) {
+            throw new Exception("Password Required");
         }
+        else if (!pass.matches(passReenter)) {
+            throw new Exception("Passwords Do Not Match");
+        } else return true;
     }
 
     private void startMainActivity() {
@@ -120,17 +130,47 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         startActivity(intent);
     }
 
-    private void reportError(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
-
     private void authenticateUser() {
-        getItem();
+        authenticateItem();
     }
 
-    private void loginExistingUser() {
-        startMainActivity();
+    private boolean validateUser(boolean existingUser) {
+        try {
+            boolean validEmailAndPass = validateEmailAndPass();
+            if (!existingUser) {
+                boolean reenterValid = validateReenterPassword();
+                return validEmailAndPass && reenterValid;
+            }
+            return validEmailAndPass;
+        } catch (Exception e) {
+            mToast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
+            clearPasswords();
+            return false;
+        }
     }
+
+    private void clearPasswords() {
+        if (mPassword.getText().toString() != "") {
+            mPassword.setText("");
+        }
+        if (mReenterPassword.getText().toString() != "") {
+            mReenterPassword.setText("");
+        }
+    }
+
+    private boolean validateEmailAndPass() throws Exception {
+        String pass = mPassword.getText().toString();
+        String email = mEmail.getText().toString();
+
+        if (email.isEmpty() || pass.isEmpty()) {
+            throw new Exception("Email or Password Empty");
+        }
+        else if (!email.contains("@") || !email.contains(".edu") && !email.contains(".com")) {
+            throw new Exception("Invalid Email Address");
+        }
+        else return true;
+    }
+
 
     private void createNewUser() {
 //        startMainActivity();
@@ -139,46 +179,62 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private AlertDialog createHeroSelectionDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(R.layout.hero_selection_dialog);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //if champ selected go to main activity
+                startMainActivity();
+                clearPasswords();
+            }
+        });
+        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
         return builder.create();
     }
 
     @Override
     public void onClick(View v) {
+        boolean validated = false;
         switch (v.getId()) {
             case R.id.login_tv:
                 setExistingUserUI();
                 break;
             case R.id.sign_up_tv:
-                setCreateUserUI();
+                setNewUserUI();
                 break;
             case R.id.loginButton:
-                //TODO Authentication goes here....
-                //create and call seperation method from here
-
-                authenticateUser();
-
-                if(authSuccess) {
-                    if (mExistingUser) {
-                        loginExistingUser();
-                    } else if (!mExistingUser) {
-                        if (validateSamePassword()) {
-                            createNewUser();
-                        }
+                validated = validateUser(mExistingUser);
+                if (validated) {
+                    //TODO make 'auhtSuccess' local or a return value of the authenticateUser() method perhaps?
+                    authenticateUser();
+                    if (authSuccess) {
+                        startMainActivity();
+                    } else { //if authentication fails...
+                        mToast.makeText(mContext, "Authentication Failed", Toast.LENGTH_SHORT).show();
                     }
-                }else{
-                    mErrorInfo.setText("Username or Password Incorrect.");
                 }
-
                 break;
-            case R.id.cancel_dialog_button:
-                mAlertDialog.cancel();
+            case R.id.create_new_button:
+                validated = validateUser(mExistingUser);
+                if (validated) {
+                    createNewUser();
+                }
                 break;
-            case R.id.ok_dialog_button:
-                //Check if they have selected a champ then close Dialog
-                mAlertDialog.cancel();
-                break;
+//            case R.id.cancel_dialog_button:
+//                if(mAlertDialog.isShowing())
+//                    mAlertDialog.cancel();
+//                break;
+//            case R.id.ok_dialog_button:
+//                //TODO: Check if they have selected a champ then close Dialog
+//                startMainActivity();
+//                clearPasswords();
+//                break;
         }
     }
     /*
@@ -188,17 +244,17 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             return;
         }
 
-        // Create a new item
-        final UserItem item = new UserItem();
+        // Create a new mStudent
+        final UserItem mStudent = new UserItem();
 
-        item.setText(mInsertText.getText().toString());
+        mStudent.setText(mInsertText.getText().toString());
 
-        // Insert the new item
+        // Insert the new mStudent
         AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>(){
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    final UserItem entity = mToDoTable.insert(item).get();
+                    final UserItem entity = mToDoTable.insert(mStudent).get();
 
                     runOnUiThread(new Runnable() {
                         @Override
@@ -218,35 +274,35 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
     */
 
-    private void getItem(){
+    private void authenticateItem(){
         if (mClient == null) {
             authSuccess = false;
             return;
         }
 
-        // Create a new item
-        //final Student item = new Student();
+        // Create a new mStudent
+        //final Student mStudent = new Student();
         final String email = mEmail.getText().toString();
         final String password = mPassword.getText().toString();
 
-        //item.setText(mEmail.getText().toString());
-        //item.setMytext(mPassword.getText().toString());
+        //mStudent.setText(mEmail.getText().toString());
+        //mStudent.setMytext(mPassword.getText().toString());
 
 
-        // Insert the new item
-        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>(){
+        // Insert the new mStudent
+        AsyncTask<Void, Void, Void> authenticate = new AsyncTask<Void, Void, Void>(){
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    final List<Student> entity = mToDoTable.where().field("email").eq(email).execute().get();
+                    final List<Student> students = mToDoTable.where().field("email").eq(email).execute().get();
                     //final List<Student> passwordEntity = mToDoTable.where().field("password").eq(password).execute().get();
 
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if(!entity.isEmpty() && (password.equals(entity.get(0).getMpassword()))){
-                                item = entity.get(0);
+                            if(!students.isEmpty() && (password.equals(students.get(0).getMpassword()))){
+                                mStudent = students.get(0);
                                 authSuccess = true;
                                 //mErrorInfo.setText("Success!");
                             }else{
@@ -263,7 +319,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
         };
 
-        runAsyncTask(task);
+        runAsyncTask(authenticate);
     }
 
     private AsyncTask<Void, Void, Void> runAsyncTask(AsyncTask<Void, Void, Void> task) {

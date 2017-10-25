@@ -24,7 +24,7 @@
 
     <string name="sign_up">Don\'t have an account yet? Sign Up.</string>
     <string name="login">Already have an account? Login.</string>
-
+    <string name="create_account">Create New Account</string>
     <string name="choose_hero">Choose your hero!</string>
 
     <string name="map_type_normal">Normal</string>

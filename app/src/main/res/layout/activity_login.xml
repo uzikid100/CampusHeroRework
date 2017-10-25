@@ -72,14 +72,6 @@
             android:inputType="textPersonName"
             android:textSize="15dp" />
 
-        <TextView
-            android:id="@+id/errorInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="24dp"
-            android:text="TextView" />
 
         <EditText
             android:id="@+id/password_editText"
@@ -116,6 +108,17 @@
             android:layout_centerInParent="true"
             android:backgroundTint="@color/lightGreen"
             android:text="Login"
+            android:onClick="onClick"/>
+
+        <Button
+            android:id="@+id/create_new_button"
+            android:layout_width="300dp"
+            android:layout_height="40dp"
+            android:layout_below="@id/reenter_password_editText"
+            android:layout_centerInParent="true"
+            android:backgroundTint="@color/lightGreen"
+            android:text="@string/create_account"
+            android:visibility="gone"
             android:onClick="onClick"/>
 
         <TextView

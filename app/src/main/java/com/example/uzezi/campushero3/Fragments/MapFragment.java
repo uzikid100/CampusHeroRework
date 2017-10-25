@@ -24,7 +24,11 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.location.places.ui.SupportPlaceAutocompleteFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -72,6 +76,9 @@ public class MapFragment extends Fragment
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        SupportPlaceAutocompleteFragment supportPlaceAutocompleteFragment = (SupportPlaceAutocompleteFragment) getFragmentManager()
+                .findFragmentById(R.id.place_autocomplete_fragment);
+        
         mFusedLocationApi = LocationServices.FusedLocationApi;
         mContext = this.getActivity().getApplicationContext();
 
@@ -118,11 +125,11 @@ public class MapFragment extends Fragment
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
             mMap.setOnPoiClickListener(this); //must explicitly set PoiClickListener to 'this' instance of Google maps
         }
-            if (ActivityCompat.checkSelfPermission(this.mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                mMap.setMyLocationEnabled(true);
-            }
-             else {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Fine_Location_Request_Code);
+        if (ActivityCompat.checkSelfPermission(this.mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        }
+        else {
+        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Fine_Location_Request_Code);
         }
 
         //TODO try to setSupportActionBar if I can
@@ -131,22 +138,11 @@ public class MapFragment extends Fragment
 
     }
 
-    private void onCameraMoved() {
-//        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
-//            @Override
-//            public void onCameraMove() {
-//                mMap.getUiSettings().setMyLocationButtonEnabled(true);
-//            }
-//        });
-//
-//        mMap.setOnCameraIdleListener();
-    }
-
 
 
     @Override
     public void onLocationChanged(Location location) {
-        Toast.makeText(mContext, "onLocationChanged", Toast.LENGTH_SHORT).show();
+
     }
 
     public void goToCurrentLocation() {
@@ -157,11 +153,7 @@ public class MapFragment extends Fragment
             mMap.addMarker(new MarkerOptions().position(ll)
                     .title("You"));
         }
-//        else{
-//            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, DEFAULT_ZOOM));
-//            mMap.addMarker(new MarkerOptions().position(DEFAULT_LOCATION)
-//                    .title("You")) ;
-//        }
+        //TODO: else move map to DEFAULT_POSITION
     }
 
     @Override
