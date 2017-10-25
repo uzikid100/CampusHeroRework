@@ -138,22 +138,11 @@ public class MapFragment extends Fragment
 
     }
 
-    private void onCameraMoved() {
-//        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
-//            @Override
-//            public void onCameraMove() {
-//                mMap.getUiSettings().setMyLocationButtonEnabled(true);
-//            }
-//        });
-//
-//        mMap.setOnCameraIdleListener();
-    }
-
 
 
     @Override
     public void onLocationChanged(Location location) {
-        Toast.makeText(mContext, "onLocationChanged", Toast.LENGTH_SHORT).show();
+
     }
 
     public void goToCurrentLocation() {
@@ -164,11 +153,7 @@ public class MapFragment extends Fragment
             mMap.addMarker(new MarkerOptions().position(ll)
                     .title("You"));
         }
-//        else{
-//            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, DEFAULT_ZOOM));
-//            mMap.addMarker(new MarkerOptions().position(DEFAULT_LOCATION)
-//                    .title("You")) ;
-//        }
+        //TODO: else move map to DEFAULT_POSITION
     }
 
     @Override

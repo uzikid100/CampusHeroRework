@@ -1,6 +1,7 @@
 package com.example.uzezi.campushero3.Login;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -59,7 +60,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private Context mContext;
     private AlertDialog mAlertDialog;
-    private Toast mUiLog;
+    private Toast mToast;
     private boolean mExistingUser = true;
     private UiErrorLog mLogger;
 
@@ -142,8 +143,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
             return validEmailAndPass;
         } catch (Exception e) {
-            Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
+            mToast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
+            clearPasswords();
             return false;
+        }
+    }
+
+    private void clearPasswords() {
+        if (mPassword.getText().toString() != "") {
+            mPassword.setText("");
+        }
+        if (mReenterPassword.getText().toString() != "") {
+            mReenterPassword.setText("");
         }
     }
 
@@ -168,8 +179,22 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private AlertDialog createHeroSelectionDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(R.layout.hero_selection_dialog);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //if champ selected go to main activity
+                startMainActivity();
+                clearPasswords();
+            }
+        });
+        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
         return builder.create();
     }
 
@@ -190,8 +215,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     authenticateUser();
                     if (authSuccess) {
                         startMainActivity();
-                    } else {
-                        Toast.makeText(mContext, "Authentication Failed", Toast.LENGTH_SHORT).show();
+                    } else { //if authentication fails...
+                        mToast.makeText(mContext, "Authentication Failed", Toast.LENGTH_SHORT).show();
                     }
                 }
                 break;
@@ -201,14 +226,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     createNewUser();
                 }
                 break;
-            case R.id.cancel_dialog_button:
-                if(mAlertDialog.isShowing())
-                    mAlertDialog.cancel();
-                break;
-            case R.id.ok_dialog_button:
-                //TODO: Check if they have selected a champ then close Dialog
-                startMainActivity();
-                break;
+//            case R.id.cancel_dialog_button:
+//                if(mAlertDialog.isShowing())
+//                    mAlertDialog.cancel();
+//                break;
+//            case R.id.ok_dialog_button:
+//                //TODO: Check if they have selected a champ then close Dialog
+//                startMainActivity();
+//                clearPasswords();
+//                break;
         }
     }
     /*
