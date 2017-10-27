@@ -52,6 +52,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private Button mCreateNewButton;
     private TextView mSignUpTV;
     private TextView mLoginTv;
+    private TextView mCampusTv;
 
     private MobileServiceClient mClient;
     private MobileServiceTable<Student> mToDoTable;
@@ -92,6 +93,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mCreateNewButton = (Button) findViewById(R.id.create_new_button);
         mSignUpTV = (TextView) findViewById(R.id.sign_up_tv);
         mLoginTv = (TextView) findViewById(R.id.login_tv);
+        mCampusTv = (TextView) findViewById(R.id.campus_tv);
     }
 
     private void setNewUserUI() {
@@ -130,15 +132,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         startActivity(intent);
     }
 
-    private void authenticateUser() {
-        authenticateItem();
-    }
+    //private void authenticateUser() {
+    //    authenticateUser();
+    //}
 
     private boolean validateUser(boolean existingUser) {
         try {
             boolean validEmailAndPass = validateEmailAndPass();
             if (!existingUser) {
                 boolean reenterValid = validateReenterPassword();
+                if(reenterValid){
+                    addItem();
+                }
                 return validEmailAndPass && reenterValid;
             }
             return validEmailAndPass;
@@ -237,44 +242,52 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 //                break;
         }
     }
-    /*
-    private void addItem(){
 
+    private void addItem(){
         if (mClient == null) {
+            authSuccess = false;
             return;
         }
 
         // Create a new mStudent
-        final UserItem mStudent = new UserItem();
+        //final Student mStudent = new Student();
+        final String email = mEmail.getText().toString();
+        final String password = mPassword.getText().toString();
+        final Student entry = new Student(email, password, 1002);
 
-        mStudent.setText(mInsertText.getText().toString());
+        //mStudent.setText(mEmail.getText().toString());
+        //mStudent.setMytext(mPassword.getText().toString());
+
 
         // Insert the new mStudent
         AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>(){
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    final UserItem entity = mToDoTable.insert(mStudent).get();
+                    final Student student = mToDoTable.insert(entry).get();
+                    //final List<Student> passwordEntity = mToDoTable.where().field("password").eq(password).execute().get();
+                    authSuccess = true;
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            mInsertInfo.setText(entity.getText());
-                            //mAdapter.add(entity);
+                        //mEmail.setText("YAY");
                         }
                     });
                 } catch (final Exception e) {
-
+                    e.printStackTrace();
                 }
+
                 return null;
             }
         };
 
         runAsyncTask(task);
-    }
-    */
 
-    private void authenticateItem(){
+    }
+
+
+    private void authenticateUser(){
         if (mClient == null) {
             authSuccess = false;
             return;
@@ -374,3 +387,36 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
 
 }
+/*
+ if (mClient == null) {
+            return;
+        }
+
+        // Create a new mStudent
+        final UserItem mStudent = new UserItem();
+
+        mStudent.setText(mInsertText.getText().toString());
+
+        // Insert the new mStudent
+        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>(){
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    final UserItem entity = mToDoTable.insert(mStudent).get();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mInsertInfo.setText(entity.getText());
+                            //mAdapter.add(entity);
+                        }
+                    });
+                } catch (final Exception e) {
+
+                }
+                return null;
+            }
+        };
+
+        runAsyncTask(task);
+ */
