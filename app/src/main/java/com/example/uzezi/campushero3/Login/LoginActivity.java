@@ -173,7 +173,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
 
     private void createNewUser() {
-//        startMainActivity();
         mAlertDialog = createHeroSelectionDialog();
         mAlertDialog.show();
     }
