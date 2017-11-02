@@ -174,6 +174,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private void createNewUser() {
 //        startMainActivity();
+        addItem();
         mAlertDialog = createHeroSelectionDialog();
         mAlertDialog.show();
     }
@@ -237,7 +238,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 //                break;
         }
     }
-    /*
+
     private void addItem(){
 
         if (mClient == null) {
@@ -245,26 +246,32 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
 
         // Create a new mStudent
-        final UserItem mStudent = new UserItem();
+        final Student mStudent1 = new Student();
 
-        mStudent.setText(mInsertText.getText().toString());
+        mStudent1.setMemail(mEmail.getText().toString());
+        mStudent1.setMpassword(mPassword.getText().toString());
+        //mStudent1.setMschoolId(1001);
+        //mStudent1.setmId(1032);
+
+        //mStudent.setText(mInsertText.getText().toString());
 
         // Insert the new mStudent
         AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>(){
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    final UserItem entity = mToDoTable.insert(mStudent).get();
+                    //final Student entity =
+                            mToDoTable.insert(mStudent1).get();
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            mInsertInfo.setText(entity.getText());
+                            //mInsertInfo.setText(entity.getMemail());
                             //mAdapter.add(entity);
                         }
                     });
                 } catch (final Exception e) {
-
+                    e.printStackTrace();
                 }
                 return null;
             }
@@ -272,7 +279,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         runAsyncTask(task);
     }
-    */
+
 
     private void authenticateItem(){
         if (mClient == null) {
@@ -295,6 +302,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             protected Void doInBackground(Void... params) {
                 try {
                     final List<Student> students = mToDoTable.where().field("email").eq(email).execute().get();
+                    //System.out.println("placeholder");
                     //final List<Student> passwordEntity = mToDoTable.where().field("password").eq(password).execute().get();
 
 
