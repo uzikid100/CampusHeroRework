@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/CampusHero.iml" filepath="$PROJECT_DIR$/CampusHero.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CampusHero3.iml" filepath="$PROJECT_DIR$/CampusHero3.iml" />
       <module fileurl="file://$PROJECT_DIR$/CampusHeroRework.iml" filepath="$PROJECT_DIR$/CampusHeroRework.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
