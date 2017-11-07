@@ -9,21 +9,17 @@ package com.example.uzezi.campushero3;
  */
 
 public class Student {
-    /**
-     * Item text
-     */
-    @com.google.gson.annotations.SerializedName("lastLongitude")
-    private String mlastLongitude;
+
 
     /**
      * Item Id
      */
     @com.google.gson.annotations.SerializedName("id")
-    private int mId;
+    private String mId;
 
-    /**
-     * Item mytext
-     */
+    @com.google.gson.annotations.SerializedName("lastLongitude")
+    private String mlastLongitude;
+
     @com.google.gson.annotations.SerializedName("lastLatitude")
     private String mlastLatitude;
 
@@ -56,7 +52,7 @@ public class Student {
     }
 
     @Override
-    public String toString() {return getMfirstName();}
+    public String toString() {return getMemail();}
 
     /**
      * Initializes a new UserItem
@@ -64,16 +60,16 @@ public class Student {
      * @param id
      *            The item id
      */
-    public Student(int id) {
+    public Student(String id) {
         this.setId(id);
     }
 
 
-    public int getId() {
+    public String getId() {
         return mId;
     }
 
-    public final void setId(int id) {
+    public final void setId(String id) {
         mId = id;
     }
 
@@ -83,14 +79,6 @@ public class Student {
 
     public void setMlastLongitude(String mlastLongitude) {
         this.mlastLongitude = mlastLongitude;
-    }
-
-    public int getmId() {
-        return mId;
-    }
-
-    public void setmId(int mId) {
-        this.mId = mId;
     }
 
     public String getMlastLatitude() {
@@ -140,7 +128,7 @@ public class Student {
     public void setMpassword(String mpassword) {
         this.mpassword = mpassword;
     }
-
+/*
     public String getMgpa() {
         return mgpa;
     }
@@ -156,7 +144,7 @@ public class Student {
     public void setMprofilePicture(byte[] mprofilePicture) {
         this.mprofilePicture = mprofilePicture;
     }
-
+*/
     @Override
     public boolean equals(Object o) {
         return o instanceof Student && ((Student) o).mId == mId;

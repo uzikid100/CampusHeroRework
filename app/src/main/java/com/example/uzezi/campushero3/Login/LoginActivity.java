@@ -1,5 +1,6 @@
 package com.example.uzezi.campushero3.Login;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,29 +15,20 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ProgressBar;
 
 import com.example.uzezi.campushero3.MainActivity;
 import com.example.uzezi.campushero3.R;
 import com.example.uzezi.campushero3.Student;
 import com.example.uzezi.campushero3.UiErrorLog;
-import com.google.common.util.concurrent.ExecutionError;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
-import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
-
-
+import com.microsoft.windowsazure.mobileservices.http.OkHttpClientFactory;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
-
 import java.net.MalformedURLException;
-import java.util.List;
-
+import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.squareup.okhttp.OkHttpClient;
 
 
 /**
@@ -52,10 +44,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private Button mCreateNewButton;
     private TextView mSignUpTV;
     private TextView mLoginTv;
+    private ProgressBar mProgressBar;
 
     private MobileServiceClient mClient;
-    private MobileServiceTable<Student> mToDoTable;
-    private boolean authSuccess = false;
+    private MobileServiceTable<Student> mUserTable;
     private Student mStudent = new Student();
 
     private Context mContext;
@@ -63,25 +55,38 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private Toast mToast;
     private boolean mExistingUser = true;
     private UiErrorLog mLogger;
+    public ArrayList<Student> mStudents = new ArrayList<>();
 
 
     //TODO required fields missing depending on new/existing user
-    //TODO validate email address
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
         try {
             mClient = new MobileServiceClient(
                     "https://campushero1.azurewebsites.net",
-                    this).withFilter(new ProgressFilter()
+                    this
             );
+
+            // Extend timeout from default of 10s to 20s
+            mClient.setAndroidHttpClientFactory(new OkHttpClientFactory() {
+                @Override
+                public OkHttpClient createOkHttpClient() {
+                    OkHttpClient client = new OkHttpClient();
+                    client.setReadTimeout(20, TimeUnit.SECONDS);
+                    client.setWriteTimeout(20, TimeUnit.SECONDS);
+                    return client;
+                }
+            });
+
+
+            mUserTable = mClient.getTable(Student.class);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        mToDoTable = mClient.getTable(Student.class);
+
         mLogger = new UiErrorLog(getApplicationContext());
         mContext = this.getApplicationContext();
 
@@ -92,6 +97,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mCreateNewButton = (Button) findViewById(R.id.create_new_button);
         mSignUpTV = (TextView) findViewById(R.id.sign_up_tv);
         mLoginTv = (TextView) findViewById(R.id.login_tv);
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        mProgressBar.setVisibility(ProgressBar.GONE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mProgressBar.setVisibility(ProgressBar.GONE);
     }
 
     private void setNewUserUI() {
@@ -128,10 +141,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         Class DestinationActivity = MainActivity.class;
         Intent intent = new Intent(context, DestinationActivity);
         startActivity(intent);
-    }
-
-    private void authenticateUser() {
-        authenticateItem();
     }
 
     private boolean validateUser(boolean existingUser) {
@@ -173,7 +182,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
 
     private void createNewUser() {
-//        startMainActivity();
+        addUser();
         mAlertDialog = createHeroSelectionDialog();
         mAlertDialog.show();
     }
@@ -211,13 +220,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             case R.id.loginButton:
                 validated = validateUser(mExistingUser);
                 if (validated) {
-                    //TODO make 'auhtSuccess' local or a return value of the authenticateUser() method perhaps?
                     authenticateUser();
-                    if (authSuccess) {
-                        startMainActivity();
-                    } else { //if authentication fails...
-                        mToast.makeText(mContext, "Authentication Failed", Toast.LENGTH_SHORT).show();
-                    }
                 }
                 break;
             case R.id.create_new_button:
@@ -237,91 +240,142 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 //                break;
         }
     }
-    /*
-    private void addItem(){
 
+    /*
+    Add User:
+       This method adds a new user to the Student database table, based on the inputted credentials.
+     */
+    private void addUser(){
         if (mClient == null) {
             return;
         }
 
-        // Create a new mStudent
-        final UserItem mStudent = new UserItem();
+        // Create a new Student with the specified username and password.
+        mStudent.setMemail(mEmail.getText().toString());
+        mStudent.setMpassword(mPassword.getText().toString());
 
-        mStudent.setText(mInsertText.getText().toString());
-
-        // Insert the new mStudent
+        /*
+         Insert the new mStudent into the database. The AsyncTask variable runs in the background.
+          */
+        @SuppressLint("StaticFieldLeak")
         AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>(){
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    final UserItem entity = mToDoTable.insert(mStudent).get();
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mInsertInfo.setText(entity.getText());
-                            //mAdapter.add(entity);
-                        }
-                    });
+                     mUserTable.insert(mStudent).get();
                 } catch (final Exception e) {
-
+                    e.printStackTrace();
                 }
                 return null;
+            }
+            /*
+            unused method.
+             */
+            @Override
+            protected void onPostExecute(Void result) {
+
+            }
+
+            /*
+            This method runs before doInBackground. In this case, it just displays the loading
+                symbol to the user.
+             */
+            @Override
+            protected void onPreExecute() {
+                if (mProgressBar != null) mProgressBar.setVisibility(ProgressBar.VISIBLE);
+            }
+
+            /*
+            unused method.
+             */
+            @Override
+            protected void onProgressUpdate(Void... values) {
             }
         };
 
         runAsyncTask(task);
     }
-    */
 
-    private void authenticateItem(){
+    /*
+    Authenticate User:
+        This method is called when the credentials entered by the user are ready to be compared to
+         the database Student table.
+     */
+    private void authenticateUser(){
         if (mClient == null) {
-            authSuccess = false;
             return;
         }
 
-        // Create a new mStudent
-        //final Student mStudent = new Student();
+        //Store the value in the email field in a new variable, which will be passed to the database
         final String email = mEmail.getText().toString();
-        final String password = mPassword.getText().toString();
 
-        //mStudent.setText(mEmail.getText().toString());
-        //mStudent.setMytext(mPassword.getText().toString());
-
-
-        // Insert the new mStudent
-        AsyncTask<Void, Void, Void> authenticate = new AsyncTask<Void, Void, Void>(){
+        /*
+         Compare the email to those in the database's Student table. TAsyncTask is an abstract class
+          provided by Android which helps us to use the UI thread properly. This class allows us to
+          perform long/background operations and show its result on the UI thread without having to
+          manipulate threads. Here doInBackground task will be implemented in background and
+          onPostExecute will be shown on GUI.
+          */
+        @SuppressLint("StaticFieldLeak")
+        final AsyncTask<Void, Void, Void> authenticate = new AsyncTask<Void, Void, Void>(){
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    final List<Student> students = mToDoTable.where().field("email").eq(email).execute().get();
-                    //final List<Student> passwordEntity = mToDoTable.where().field("password").eq(password).execute().get();
+                    mStudents = mUserTable.where().field("email").eq(email).execute().get();
 
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(!students.isEmpty() && (password.equals(students.get(0).getMpassword()))){
-                                mStudent = students.get(0);
-                                authSuccess = true;
-                                //mErrorInfo.setText("Success!");
-                            }else{
-                                authSuccess = false;
-                                //mErrorInfo.setText("Username or Password Incorrect.");
-                            }
-                        }
-                    });
                 } catch (final Exception e) {
+                    mToast.makeText(mContext, "An error occurred", Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 }
-
                 return null;
             }
-        };
 
+            /*
+            This method runs when the doInBackground method finishes. It first checks if the email
+                was in the database and then checks if the password entered by the user matches the
+                one for the email in the database. Returns an error message to the user if either of
+                these are false.
+             */
+            @Override
+            protected void onPostExecute(Void result) {
+                if (!mStudents.isEmpty()) {
+                    mStudent = mStudents.get(0);
+                    if (mStudent.getMpassword().equals(mPassword.getText().toString())) {
+                        startMainActivity();
+                    }
+                    else {
+                        mToast.makeText(mContext, "Wrong password", Toast.LENGTH_SHORT).show();
+                        mProgressBar.setVisibility(ProgressBar.GONE);
+                    }
+                } else {
+                    mToast.makeText(mContext, "Authentication Failed. Try again.", Toast.LENGTH_SHORT).show();
+                    mProgressBar.setVisibility(ProgressBar.GONE);
+                }
+            }
+
+            /*
+            This method runs before doInBackground. In this case, it just displays the loading
+                symbol to the user.
+             */
+            @Override
+            protected void onPreExecute() {
+                if (mProgressBar != null) mProgressBar.setVisibility(ProgressBar.VISIBLE);
+            }
+
+            /*
+            unused method.
+             */
+            @Override
+            protected void onProgressUpdate(Void... values) {
+            }
+        };
         runAsyncTask(authenticate);
     }
-
+    /*
+    Run Async Task:
+        This method takes a task and executes it. If the OS version is less than or equal to
+            Honeycomb, it has to execute a little differently, but otherwise it just executes.
+     */
     private AsyncTask<Void, Void, Void> runAsyncTask(AsyncTask<Void, Void, Void> task) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             return task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -329,48 +383,4 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             return task.execute();
         }
     }
-
-    private class ProgressFilter implements ServiceFilter {
-
-        @Override
-        public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
-
-            final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
-
-
-            runOnUiThread(new Runnable() {
-
-                @Override
-                public void run() {
-                    //if (mProgressBar != null) mProgressBar.setVisibility(ProgressBar.VISIBLE);
-                }
-            });
-
-            ListenableFuture<ServiceFilterResponse> future = nextServiceFilterCallback.onNext(request);
-
-            Futures.addCallback(future, new FutureCallback<ServiceFilterResponse>() {
-                @Override
-                public void onFailure(Throwable e) {
-                    resultFuture.setException(e);
-                }
-
-                @Override
-                public void onSuccess(ServiceFilterResponse response) {
-                    runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            //if (mProgressBar != null) mProgressBar.setVisibility(ProgressBar.GONE);
-                        }
-                    });
-
-                    resultFuture.set(response);
-                }
-            });
-
-            return resultFuture;
-        }
-    }
-
-
 }
