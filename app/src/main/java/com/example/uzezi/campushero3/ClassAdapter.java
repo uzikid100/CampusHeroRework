@@ -71,6 +71,7 @@ public class ClassAdapter extends BaseAdapter {
             convertView = mInflater.inflate(R.layout.class_list_layout, null);
             holder = new ViewHolder();
             holder.txtname = (TextView) convertView.findViewById(R.id.titleTextView);
+            holder.txttime = (TextView) convertView.findViewById(R.id.Time);
 
             convertView.setTag(holder);
         } else {
@@ -78,13 +79,14 @@ public class ClassAdapter extends BaseAdapter {
         }
 
         holder.txtname.setText(listContact.get(position).getMsimpleName());
+        holder.txttime.setText(listContact.get(position).getMstartTime());
 
         return convertView;
 
     }
 
     static class ViewHolder{
-        TextView txtname;
+        TextView txtname, txttime;
     }
 }
 /*

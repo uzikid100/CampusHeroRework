@@ -45,9 +45,11 @@ public class Classes {
      * @param id
      *            The item id
      */
-    public Classes(String id, String simpleName, String studentId) {
+    public Classes(String id, String simpleName, String startTime, String studentId) {
         this.setId(id);
         this.setMsimpleName(simpleName);
+        startTime = startTime.substring(11,16);
+        this.setMstartTime(startTime);
         this.setmStudentId(studentId);
     }
 

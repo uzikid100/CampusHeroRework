@@ -49,7 +49,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private Button mCreateNewButton;
     private TextView mSignUpTV;
     private TextView mLoginTv;
-    private ProgressBar mProgressBar;
+    //private ProgressBar mProgressBar;
+    private ProgressBar mProgressBar2;
 
     private MobileServiceClient mClient;
     private MobileServiceTable<Student> mUserTable;
@@ -113,14 +114,17 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mCreateNewButton = (Button) findViewById(R.id.create_new_button);
         mSignUpTV = (TextView) findViewById(R.id.sign_up_tv);
         mLoginTv = (TextView) findViewById(R.id.login_tv);
-        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        mProgressBar.setVisibility(ProgressBar.GONE);
+        //mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        //mProgressBar.setVisibility(ProgressBar.GONE);
+        mProgressBar2 = (ProgressBar) findViewById(R.id.progressBar2);
+        mProgressBar2.setVisibility(ProgressBar.GONE);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mProgressBar.setVisibility(ProgressBar.GONE);
+        //mProgressBar.setVisibility(ProgressBar.GONE);
+        mProgressBar2.setVisibility(ProgressBar.GONE);
     }
 
     private void setNewUserUI() {
@@ -289,7 +293,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
              */
             @Override
             protected void onPostExecute(Void result) {
-
+                mProgressBar2.setMax(100);
+                mProgressBar2.setProgress(50);
             }
 
             /*
@@ -298,7 +303,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
              */
             @Override
             protected void onPreExecute() {
-                if (mProgressBar != null) mProgressBar.setVisibility(ProgressBar.VISIBLE);
+                if (mProgressBar2 != null) mProgressBar2.setVisibility(ProgressBar.VISIBLE);
             }
 
             /*
@@ -344,11 +349,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if (!mClasses.isEmpty()) {
                     db.InsertStudent(mStudent);
                     db.InsertClasses(mClasses);
-                    mProgressBar.setVisibility(ProgressBar.GONE);
+                    //mProgressBar.setVisibility(ProgressBar.GONE);
+                    mProgressBar2.setProgress(75);
                     startMainActivity();
                 } else {
                     mToast.makeText(mContext, "Authentication Failed. Try again: 2", Toast.LENGTH_SHORT).show();
-                    mProgressBar.setVisibility(ProgressBar.GONE);
+                    //mProgressBar.setVisibility(ProgressBar.GONE);
                 }
             }
 
@@ -402,15 +408,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     mStudent = mStudents.get(0);
                     if (mStudent.getMpassword().equals(mPassword.getText().toString())) {
                         //db.InsertStudent(mStudent);
+                        mProgressBar2.setProgress(50);
                         getClasses();
                     }
                     else {
                         mToast.makeText(mContext, "Wrong password", Toast.LENGTH_SHORT).show();
-                        mProgressBar.setVisibility(ProgressBar.GONE);
+                        //mProgressBar.setVisibility(ProgressBar.GONE);
                     }
                 } else {
                     mToast.makeText(mContext, "Authentication Failed. Try again.", Toast.LENGTH_SHORT).show();
-                    mProgressBar.setVisibility(ProgressBar.GONE);
+                    //mProgressBar.setVisibility(ProgressBar.GONE);
                 }
             }
 
@@ -420,7 +427,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
              */
             @Override
             protected void onPreExecute() {
-                if (mProgressBar != null) mProgressBar.setVisibility(ProgressBar.VISIBLE);
+                //if (mProgressBar != null) mProgressBar.setVisibility(ProgressBar.VISIBLE);
+                if (mProgressBar2 != null) mProgressBar2.setVisibility(ProgressBar.VISIBLE);
+                mProgressBar2.setProgress(25);
             }
 
             /*

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private static final  int DATABASE_VERSION = 10;
+    private static final  int DATABASE_VERSION = 13;
 
     static final String dbName = "campushero";
 
@@ -167,6 +167,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             ContentValues cv = new ContentValues();
             cv.put(class_ID, classes.get(i).getId());
             cv.put(class_SimpleName, classes.get(i).getMsimpleName());
+            cv.put(class_StartTime, classes.get(i).getMstartTime());
             cv.put(class_StudentId, classes.get(i).getmStudentId());
             db.insert(class_Table, null, cv);
         }
@@ -184,18 +185,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     {
         SQLiteDatabase db=this.getReadableDatabase();
 
-        Cursor cur=db.query(class_Table, new String[] {class_ID, class_SimpleName, class_StudentId}, class_StudentId+"=?",
+        Cursor cur=db.query(class_Table, new String[] {class_ID, class_SimpleName, class_StartTime,class_StudentId}, class_StudentId+"=?",
                 new String[]{index}, null, null, null, null);
         if (cur != null)
             cur.moveToFirst();
 
         ArrayList<Classes> classes = new ArrayList<>();
         do {
-            Classes classes1 = new Classes(cur.getString(0), cur.getString(1), cur.getString(2));
+            Classes classes1 = new Classes(cur.getString(0), cur.getString(1), cur.getString(2), cur.getString(3));
             classes.add(classes1);
          }while(cur.moveToNext());
-
-
 
         db.close();
         return classes;
