@@ -13,8 +13,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.uzezi.campushero3.MainActivity;
 import com.example.uzezi.campushero3.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -24,17 +26,12 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
-import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.location.places.ui.SupportPlaceAutocompleteFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PointOfInterest;
@@ -62,6 +59,11 @@ public class MapFragment extends Fragment
     private FusedLocationProviderApi mFusedLocationApi;
     private GoogleApiClient mGoogleApiClient;
     private Context mContext;
+
+    private PreviewFragment mPlacePreview;
+    private TextView mPlacePrevSlot1;
+    private TextView mPlacePrevSlot2;
+    private TextView mPlacePrevSlot3;
 
     private boolean isLocationFabVisible = false;
 
@@ -96,7 +98,10 @@ public class MapFragment extends Fragment
         mLocationRequest.setFastestInterval(1000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
+        mPlacePrevSlot1 = (TextView) getView().findViewById(R.id.place_name_tv);
 
+//        mPlacePrevSlot2 = (TextView) getActivity().findViewById(R.id.place_location_tv);
+//        mPlacePrevSlot3 = (TextView) getActivity().findViewById(R.id.place_latlng_tv);
     }
 
     @Override
@@ -153,7 +158,9 @@ public class MapFragment extends Fragment
             mMap.addMarker(new MarkerOptions().position(ll)
                     .title("You"));
         }
-        //TODO: else move map to DEFAULT_POSITION
+        else{
+            //TODO: else move map to DEFAULT_POSITION
+        }
     }
 
     @Override
@@ -253,8 +260,22 @@ public class MapFragment extends Fragment
         mGoogleApiClient.disconnect();
     }
 
+
     @Override
     public void onPoiClick(PointOfInterest pointOfInterest) {
-        Toast.makeText(mContext, pointOfInterest.name, Toast.LENGTH_SHORT).show();
+        mPlacePreview = new PreviewFragment();
+
+//        mPlacePreview.setSlot1(pointOfInterest.name);
+
+        //TODO change to mPlacePreview
+        if (mPlacePrevSlot1 != null) {
+            mPlacePreview.setSlot1(pointOfInterest.name);
+//            mPlacePrevSlot1.setText(pointOfInterest.name);
+        }else{
+        }
+//        mPlacePrevSlot1.setText(pointOfInterest.name);
+//        mPlacePrevSlot2.setText(pointOfInterest.placeId);
+        android.support.v4.app.FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        mPlacePreview.show(fragmentManager, "Preview Dialog");
     }
 }
