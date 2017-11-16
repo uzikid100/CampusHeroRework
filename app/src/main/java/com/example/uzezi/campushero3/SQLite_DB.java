@@ -9,9 +9,9 @@ import android.content.Context;
  * Created by Christopher on 11/1/2017.
  */
 
-public final class FeedReaderContract {
+public final class SQLite_DB {
 
-    private FeedReaderContract(){}
+    private SQLite_DB(){}
 
     public static class feedUsers implements BaseColumns{
         public static String TABLE_NAME = "users";

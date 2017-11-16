@@ -60,8 +60,10 @@ public class Student {
      * @param id
      *            The item id
      */
-    public Student(String id) {
+    public Student(String id, String email, String password) {
         this.setId(id);
+        this.setMemail(email);
+        this.setMpassword(password);
     }
 
 
