@@ -162,7 +162,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             if (!existingUser) {
                 boolean reenterValid = validateReenterPassword();
                 if(reenterValid){
-                    addItem();
+                    addUser();
                 }
                 return validEmailAndPass && reenterValid;
             }
@@ -263,7 +263,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
      */
     private void addUser(){
         if (mClient == null) {
-            authSuccess = false;
+            //authSuccess = false;
             return;
         }
 
