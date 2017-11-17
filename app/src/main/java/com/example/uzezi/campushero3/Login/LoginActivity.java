@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,14 +18,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ProgressBar;
 
+import com.example.uzezi.campushero3.Classes;
+import com.example.uzezi.campushero3.DatabaseHelper;
 import com.example.uzezi.campushero3.MainActivity;
 import com.example.uzezi.campushero3.R;
 import com.example.uzezi.campushero3.Student;
+import com.example.uzezi.campushero3.StudentToClass;
 import com.example.uzezi.campushero3.UiErrorLog;
 import com.microsoft.windowsazure.mobileservices.http.OkHttpClientFactory;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
@@ -44,11 +49,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private Button mCreateNewButton;
     private TextView mSignUpTV;
     private TextView mLoginTv;
-    private ProgressBar mProgressBar;
+    private TextView mCampusTv;
+    private ProgressBar mProgressBar2;
 
     private MobileServiceClient mClient;
     private MobileServiceTable<Student> mUserTable;
+    private MobileServiceTable<Classes> mClassTable;
     private Student mStudent = new Student();
+    private Classes mClass = new Classes();
 
     private Context mContext;
     private AlertDialog mAlertDialog;
@@ -56,6 +64,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private boolean mExistingUser = true;
     private UiErrorLog mLogger;
     public ArrayList<Student> mStudents = new ArrayList<>();
+    public ArrayList<Classes> mClasses = new ArrayList<>();
+
+    public DatabaseHelper db = new DatabaseHelper(this);
 
 
     //TODO required fields missing depending on new/existing user
@@ -70,19 +81,20 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     this
             );
 
-            // Extend timeout from default of 10s to 20s
+            // Extend timeout from default of 10s to 30s
             mClient.setAndroidHttpClientFactory(new OkHttpClientFactory() {
                 @Override
                 public OkHttpClient createOkHttpClient() {
                     OkHttpClient client = new OkHttpClient();
-                    client.setReadTimeout(20, TimeUnit.SECONDS);
-                    client.setWriteTimeout(20, TimeUnit.SECONDS);
+                    client.setReadTimeout(70, TimeUnit.SECONDS);
+                    client.setWriteTimeout(70, TimeUnit.SECONDS);
                     return client;
                 }
             });
 
 
             mUserTable = mClient.getTable(Student.class);
+            mClassTable = mClient.getTable(Classes.class);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -97,14 +109,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mCreateNewButton = (Button) findViewById(R.id.create_new_button);
         mSignUpTV = (TextView) findViewById(R.id.sign_up_tv);
         mLoginTv = (TextView) findViewById(R.id.login_tv);
-        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        mProgressBar.setVisibility(ProgressBar.GONE);
+        mCampusTv = (TextView) findViewById(R.id.campus_tv);
+        mProgressBar2 = (ProgressBar) findViewById(R.id.progressBar2);
+        mProgressBar2.setVisibility(ProgressBar.GONE);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mProgressBar.setVisibility(ProgressBar.GONE);
+        mProgressBar2.setVisibility(ProgressBar.GONE);
     }
 
     private void setNewUserUI() {
@@ -148,6 +161,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             boolean validEmailAndPass = validateEmailAndPass();
             if (!existingUser) {
                 boolean reenterValid = validateReenterPassword();
+                if(reenterValid){
+                    addUser();
+                }
                 return validEmailAndPass && reenterValid;
             }
             return validEmailAndPass;
@@ -247,6 +263,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
      */
     private void addUser(){
         if (mClient == null) {
+            //authSuccess = false;
             return;
         }
 
@@ -256,7 +273,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         /*
          Insert the new mStudent into the database. The AsyncTask variable runs in the background.
-          */
+        */
         @SuppressLint("StaticFieldLeak")
         AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>(){
             @Override
@@ -266,6 +283,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 } catch (final Exception e) {
                     e.printStackTrace();
                 }
+
                 return null;
             }
             /*
@@ -273,7 +291,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
              */
             @Override
             protected void onPostExecute(Void result) {
-
+                mProgressBar2.setMax(100);
+                mProgressBar2.setProgress(50);
             }
 
             /*
@@ -282,7 +301,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
              */
             @Override
             protected void onPreExecute() {
-                if (mProgressBar != null) mProgressBar.setVisibility(ProgressBar.VISIBLE);
+                if (mProgressBar2 != null) mProgressBar2.setVisibility(ProgressBar.VISIBLE);
             }
 
             /*
@@ -294,6 +313,49 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         };
 
         runAsyncTask(task);
+
+    }
+
+    /*
+    Get Classes:
+        This method is called when the credentials entered by the user are correct and the SQLite
+            database can be populated with the student's classes.
+     */
+    private void getClasses(){
+        if(mClient == null){
+            return;
+        }
+
+        final String studentId = mStudent.getId();
+
+        @SuppressLint("StaticFieldLeak")
+        final AsyncTask<Void, Void, Void> classes = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    mClasses = mClassTable.where().field("studentId").eq(studentId).execute().get();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+
+                return null;
+            }
+            @Override
+            protected void onPostExecute(Void result){
+                if (!mClasses.isEmpty()) {
+                    db.InsertStudent(mStudent);
+                    db.InsertClasses(mClasses);
+                    mProgressBar2.setProgress(75);
+                    startMainActivity();
+                } else {
+                    mToast.makeText(mContext, "Authentication Failed. Try again: 2", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+        };
+        runAsyncTask(classes);
     }
 
     /*
@@ -341,15 +403,17 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if (!mStudents.isEmpty()) {
                     mStudent = mStudents.get(0);
                     if (mStudent.getMpassword().equals(mPassword.getText().toString())) {
-                        startMainActivity();
+                        //db.InsertStudent(mStudent);
+                        mProgressBar2.setProgress(50);
+                        getClasses();
                     }
                     else {
                         mToast.makeText(mContext, "Wrong password", Toast.LENGTH_SHORT).show();
-                        mProgressBar.setVisibility(ProgressBar.GONE);
+                        //mProgressBar.setVisibility(ProgressBar.GONE);
                     }
                 } else {
                     mToast.makeText(mContext, "Authentication Failed. Try again.", Toast.LENGTH_SHORT).show();
-                    mProgressBar.setVisibility(ProgressBar.GONE);
+                    //mProgressBar.setVisibility(ProgressBar.GONE);
                 }
             }
 
@@ -359,7 +423,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
              */
             @Override
             protected void onPreExecute() {
-                if (mProgressBar != null) mProgressBar.setVisibility(ProgressBar.VISIBLE);
+                //if (mProgressBar != null) mProgressBar.setVisibility(ProgressBar.VISIBLE);
+                if (mProgressBar2 != null) mProgressBar2.setVisibility(ProgressBar.VISIBLE);
+                mProgressBar2.setProgress(25);
             }
 
             /*

@@ -41,6 +41,9 @@ public class Student {
     @com.google.gson.annotations.SerializedName("gpa")
     private String mgpa;
 
+    @com.google.gson.annotations.SerializedName("deleted")
+    private boolean deleted;
+
     @com.google.gson.annotations.SerializedName("profilePicture")
     private byte[] mprofilePicture;
 
@@ -49,6 +52,13 @@ public class Student {
      */
     public Student() {
 
+    }
+
+    public Student(String email, String password, int school){
+        memail = email;
+        mpassword = password;
+        mschoolId = school;
+        deleted = false;
     }
 
     @Override
@@ -60,8 +70,10 @@ public class Student {
      * @param id
      *            The item id
      */
-    public Student(String id) {
+    public Student(String id, String email, String password) {
         this.setId(id);
+        this.setMemail(email);
+        this.setMpassword(password);
     }
 
 
