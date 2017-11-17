@@ -345,8 +345,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             protected void onPostExecute(Void result){
                 if (!mClasses.isEmpty()) {
-                    db.InsertStudent(mStudent);
-                    db.InsertClasses(mClasses);
+                    String id = db.getStudentId(studentId);
+                    if(id.length() == 0) {
+                        db.InsertStudent(mStudent);
+                        db.InsertClasses(mClasses);
+                    }
                     mProgressBar2.setProgress(75);
                     startMainActivity();
                 } else {
