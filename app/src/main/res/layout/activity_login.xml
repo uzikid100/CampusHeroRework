@@ -50,6 +50,18 @@
                 android:textStyle="bold"/>
         </LinearLayout>
 
+        <ProgressBar
+            android:id="@+id/progressBar2"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/login_image"
+            android:layout_alignParentBottom="true"
+            android:layout_alignStart="@+id/login_image"
+            android:indeterminate="false"
+            android:max="100"
+            android:progress="0" />
+
 
     </RelativeLayout>
 
