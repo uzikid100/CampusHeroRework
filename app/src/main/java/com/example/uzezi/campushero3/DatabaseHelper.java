@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private static final  int DATABASE_VERSION = 13;
+    private static final  int DATABASE_VERSION = 17;
 
     static final String dbName = "campushero";
 
@@ -125,6 +125,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(student_FirstName, student.getMfirstName());
         return db.update(student_Table, cv, student_ID+"=?",
                 new String []{String.valueOf(student.getId())});
+
     }
 
     public void DeleteStudent(Student student)
@@ -148,16 +149,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return student;
     }
 
-    public String getStudentId(){
-
+    public String getStudentId(String studentId){
+        String id = "";
         SQLiteDatabase db=this.getReadableDatabase();
+        try {
+            Cursor cur = db.query(student_Table, new String[]{student_ID}, student_ID+"=?",
+                    new String[]{studentId}, null, null, null, null);
+            if (cur != null)
+                cur.moveToFirst();
+            id = cur.getString(0);
+        }catch (Exception e){
 
-        Cursor cur=db.query(student_Table, new String[] {student_ID}, null,
-                new String[]{null}, null, null, null, null);
-        if (cur != null)
-            cur.moveToFirst();
+        }
+        db.close();
 
-        return cur.getString(0);
+        return id;
 
     }
 
@@ -201,7 +207,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public String[] getUserClassNames(String index) {
-        SQLiteDatabase db = this.getReadableDatabase();
+        //SQLiteDatabase db = this.getReadableDatabase();
 
         ArrayList<Classes> classes = getUserClasses(index);
         int counter = classes.size();
