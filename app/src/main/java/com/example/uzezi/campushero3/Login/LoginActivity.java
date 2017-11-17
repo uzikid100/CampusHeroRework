@@ -49,16 +49,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private Button mCreateNewButton;
     private TextView mSignUpTV;
     private TextView mLoginTv;
-    //private ProgressBar mProgressBar;
+    private TextView mCampusTv;
     private ProgressBar mProgressBar2;
 
     private MobileServiceClient mClient;
     private MobileServiceTable<Student> mUserTable;
     private MobileServiceTable<Classes> mClassTable;
-    //private MobileServiceTable<StudentToClass> mStudentToClassTable;
     private Student mStudent = new Student();
     private Classes mClass = new Classes();
-    //private StudentToClass mStudentToClass = new StudentToClass();
 
     private Context mContext;
     private AlertDialog mAlertDialog;
@@ -67,10 +65,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private UiErrorLog mLogger;
     public ArrayList<Student> mStudents = new ArrayList<>();
     public ArrayList<Classes> mClasses = new ArrayList<>();
-    //public ArrayList<StudentToClass> mStudentToClasses = new ArrayList<>();
 
     public DatabaseHelper db = new DatabaseHelper(this);
-    //public Cursor cursor;
 
 
     //TODO required fields missing depending on new/existing user
@@ -99,7 +95,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
             mUserTable = mClient.getTable(Student.class);
             mClassTable = mClient.getTable(Classes.class);
-            //mStudentToClassTable = mClient.getTable(StudentToClass.class);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -114,8 +109,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mCreateNewButton = (Button) findViewById(R.id.create_new_button);
         mSignUpTV = (TextView) findViewById(R.id.sign_up_tv);
         mLoginTv = (TextView) findViewById(R.id.login_tv);
-        //mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        //mProgressBar.setVisibility(ProgressBar.GONE);
+        mCampusTv = (TextView) findViewById(R.id.campus_tv);
         mProgressBar2 = (ProgressBar) findViewById(R.id.progressBar2);
         mProgressBar2.setVisibility(ProgressBar.GONE);
     }
@@ -123,7 +117,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onResume() {
         super.onResume();
-        //mProgressBar.setVisibility(ProgressBar.GONE);
         mProgressBar2.setVisibility(ProgressBar.GONE);
     }
 
@@ -168,6 +161,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             boolean validEmailAndPass = validateEmailAndPass();
             if (!existingUser) {
                 boolean reenterValid = validateReenterPassword();
+                if(reenterValid){
+                    addItem();
+                }
                 return validEmailAndPass && reenterValid;
             }
             return validEmailAndPass;
@@ -267,6 +263,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
      */
     private void addUser(){
         if (mClient == null) {
+            authSuccess = false;
             return;
         }
 
@@ -276,7 +273,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         /*
          Insert the new mStudent into the database. The AsyncTask variable runs in the background.
-          */
+        */
         @SuppressLint("StaticFieldLeak")
         AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>(){
             @Override
@@ -286,6 +283,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 } catch (final Exception e) {
                     e.printStackTrace();
                 }
+
                 return null;
             }
             /*
@@ -315,6 +313,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         };
 
         runAsyncTask(task);
+
     }
 
     /*
@@ -340,7 +339,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 }
-                //mClasses = mClassTable.where().field("")
 
                 return null;
             }
@@ -349,12 +347,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if (!mClasses.isEmpty()) {
                     db.InsertStudent(mStudent);
                     db.InsertClasses(mClasses);
-                    //mProgressBar.setVisibility(ProgressBar.GONE);
                     mProgressBar2.setProgress(75);
                     startMainActivity();
                 } else {
                     mToast.makeText(mContext, "Authentication Failed. Try again: 2", Toast.LENGTH_SHORT).show();
-                    //mProgressBar.setVisibility(ProgressBar.GONE);
                 }
             }
 
