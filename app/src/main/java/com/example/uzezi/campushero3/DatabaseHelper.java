@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private static final  int DATABASE_VERSION = 17;
+    private static final  int DATABASE_VERSION = 18;
 
     static final String dbName = "campushero";
 
@@ -104,6 +104,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    public void rebuildDB(String studentId){
+        SQLiteDatabase db = this.getReadableDatabase();
+        if(studentId != getFirstStudent().getId()){
+            db.execSQL("DROP TABLE IF EXISTS "+student_Table);
+            db.execSQL("DROP TABLE IF EXISTS "+class_Table);
+            onCreate(db);
+        }
+    }
+
     public void InsertStudent(Student student)
     {
         SQLiteDatabase db=this.getWritableDatabase();
@@ -149,6 +158,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return student;
     }
 
+    public Student getFirstStudent()
+    {
+        SQLiteDatabase db=this.getReadableDatabase();
+        Student student = new Student();
+
+        Cursor cur=db.query(student_Table, new String[] {student_ID, student_Email, student_Password}, null,
+                new String[]{}, null, null, null, null);
+        if (cur != null) {
+            cur.moveToFirst();
+            int colCount = cur.getCount();
+            if(colCount != 0){
+                student = new Student(cur.getString(0), cur.getString(1), cur.getString(2));
+            }
+        }
+        cur.close();
+        return student;
+    }
+
     public String getStudentId(String studentId){
         String id = "";
         SQLiteDatabase db=this.getReadableDatabase();
@@ -190,17 +217,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public ArrayList<Classes> getUserClasses(String index)
     {
         SQLiteDatabase db=this.getReadableDatabase();
+        ArrayList<Classes> classes = new ArrayList<>();
 
         Cursor cur=db.query(class_Table, new String[] {class_ID, class_SimpleName, class_StartTime,class_StudentId}, class_StudentId+"=?",
                 new String[]{index}, null, null, null, null);
         if (cur != null)
             cur.moveToFirst();
 
-        ArrayList<Classes> classes = new ArrayList<>();
-        do {
-            Classes classes1 = new Classes(cur.getString(0), cur.getString(1), cur.getString(2), cur.getString(3));
-            classes.add(classes1);
-         }while(cur.moveToNext());
+        if(cur.getCount()!=0) {
+            do {
+                Classes classes1 = new Classes(cur.getString(0), cur.getString(1), cur.getString(2), cur.getString(3));
+                classes.add(classes1);
+            } while (cur.moveToNext());
+        }
 
         db.close();
         return classes;

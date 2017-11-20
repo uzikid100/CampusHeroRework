@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.uzezi.campushero3.ClassAdapter;
 import com.example.uzezi.campushero3.Classes;
@@ -30,6 +31,7 @@ public class ProfileFragment extends Fragment {
     ListView myListView;
     String[] classNames;
     Context context;
+    TextView noItems;
 
     public DatabaseHelper db;
 
@@ -39,52 +41,24 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         context = inflater.getContext();
 
-        //Resources res = getResources();
-        //classNames = res.getStringArray(R.array.classNames);
-        //classNames = db.getUserClassNames(db.getStudentId());
+        noItems = (TextView) view.findViewById(R.id.noItems_tv);
+        noItems.setVisibility(noItems.GONE);
 
         ArrayList<Classes> listContact = GetlistContact();
+        if(listContact.isEmpty())
+            noItems.setVisibility(noItems.VISIBLE);
         ListView lv = (ListView)view.findViewById(R.id.List1);
         lv.setAdapter(new ClassAdapter(getActivity(), listContact));
 
-        /*
-        ClassAdapter itemAdapter = new ClassAdapter(getActivity(), R.layout.class_list_layout);
-        myListView = (ListView) view.findViewById(R.id.List1);
-        myListView.setAdapter(itemAdapter);
-        */
 
         return view;
     }
-    /*
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        context = activity;
-        //db = new DatabaseHelper(getActivity());
-    }
-    */
 
     private ArrayList<Classes> GetlistContact(){
         db = new DatabaseHelper(context);
         ArrayList<Classes> contactlist = new ArrayList<>();
-        contactlist = db.getUserClasses("AB2FCA1F-F7CB-4FE6-8352-1FCC596D0FA5");
-/*
-        Classes contact = new Classes();
-
-        contact.setMsimpleName("Topher");
-        contact.setId("01213113568");
-        contactlist.add(contact);
-
-        contact = new Classes();
-        contact.setMsimpleName("Jean");
-        contact.setId("01213869102");
-        contactlist.add(contact);
-
-        contact = new Classes();
-        contact.setMsimpleName("Andrew");
-        contact.setId("01213123985");
-        contactlist.add(contact);
-*/
+        String studentId = db.getFirstStudent().getId();
+        contactlist = db.getUserClasses(studentId);
 
         return contactlist;
     }
