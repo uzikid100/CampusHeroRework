@@ -3,6 +3,14 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <TextView
+        android:id="@+id/noItems_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="You don't have any classes yet."
+        android:textAlignment="center"
+        android:textSize="18sp" />
+
     <ListView
         android:id="@+id/List1"
         android:layout_width="match_parent"
