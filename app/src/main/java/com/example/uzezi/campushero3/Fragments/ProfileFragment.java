@@ -27,9 +27,6 @@ import java.util.ArrayList;
 
 public class ProfileFragment extends Fragment {
     private static final String TAG = "ProfileFragment";
-    private ClassAdapter mAdapter;
-    ListView myListView;
-    String[] classNames;
     Context context;
     TextView noItems;
 
@@ -56,7 +53,7 @@ public class ProfileFragment extends Fragment {
 
     private ArrayList<Classes> GetlistContact(){
         db = new DatabaseHelper(context);
-        ArrayList<Classes> contactlist = new ArrayList<>();
+        ArrayList<Classes> contactlist;
         String studentId = db.getFirstStudent().getId();
         contactlist = db.getUserClasses(studentId);
 
