@@ -344,17 +344,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
             @Override
             protected void onPostExecute(Void result){
-                if (!mClasses.isEmpty()) {
+                //if (!mClasses.isEmpty()) {
                     String id = db.getStudentId(studentId);
+                    db.rebuildDB(mStudent.getId());
                     if(id.length() == 0) {
                         db.InsertStudent(mStudent);
                         db.InsertClasses(mClasses);
                     }
                     mProgressBar2.setProgress(75);
                     startMainActivity();
-                } else {
-                    mToast.makeText(mContext, "Authentication Failed. Try again: 2", Toast.LENGTH_SHORT).show();
-                }
+                //} else {
+                //    mToast.makeText(mContext, "Authentication Failed. Try again: 2", Toast.LENGTH_SHORT).show();
+                //    mProgressBar2.setProgress(0);
+                //}
             }
 
         };

@@ -48,7 +48,8 @@ public class Classes {
     public Classes(String id, String simpleName, String startTime, String studentId) {
         this.setId(id);
         this.setMsimpleName(simpleName);
-        startTime = startTime.substring(11,16);
+        if(!(startTime==null))
+            startTime = startTime.substring(11,16);
         this.setMstartTime(startTime);
         this.setmStudentId(studentId);
     }

@@ -67,14 +67,15 @@ public class ProfileFragment extends Fragment {
     private ArrayList<Classes> GetlistContact(){
         db = new DatabaseHelper(context);
         ArrayList<Classes> contactlist = new ArrayList<>();
-        contactlist = db.getUserClasses("AB2FCA1F-F7CB-4FE6-8352-1FCC596D0FA5");
+        String studentId = db.getFirstStudent().getId();
+        contactlist = db.getUserClasses(studentId);
 /*
         Classes contact = new Classes();
 
         contact.setMsimpleName("Topher");
-        contact.setId("01213113568");
+        contact.setId("dszgfdzgfdzg");
         contactlist.add(contact);
-
+/*
         contact = new Classes();
         contact.setMsimpleName("Jean");
         contact.setId("01213869102");

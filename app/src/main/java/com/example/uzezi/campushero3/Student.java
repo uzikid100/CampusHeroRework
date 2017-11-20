@@ -51,7 +51,7 @@ public class Student {
      * UserItem constructor
      */
     public Student() {
-
+        mId = "null";
     }
 
     public Student(String email, String password, int school){
