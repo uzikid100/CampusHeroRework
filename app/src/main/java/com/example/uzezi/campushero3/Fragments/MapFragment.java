@@ -1,10 +1,13 @@
 package com.example.uzezi.campushero3.Fragments;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,8 +17,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
+import com.example.uzezi.campushero3.HttpHandler;
+import com.example.uzezi.campushero3.MainActivity;
 import com.example.uzezi.campushero3.MyUrlTileProvider;
 import com.example.uzezi.campushero3.R;
 import com.google.android.gms.common.ConnectionResult;
@@ -44,6 +52,13 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
 //
 //TODO implement google 'PlacesService', 'DirectionService,' and 'DirectionRenderer'
 //TODO research google.maps.infowindow
@@ -66,6 +81,14 @@ public class MapFragment extends Fragment
     private String mUrl = "http://a.tile.openstreetmap.org/{z}/{x}/{y}.png";
     //private String mUrl = "http://www.openstreetmap.org/#map={z}/{x}/{y}";
 
+//    private static String url = "http://api.androidhive.info/contacts/";
+//    ArrayList<HashMap<String, String>> contactList;
+//    ProgressDialog pDialog;
+
+    private static String url = "https://graphhopper.com/api/1/route?point=33.465017%2C-86.790308&point=33.465271%2C-86.793076&vehicle=foot&points_encoded=false&type=json&locale=de&key=e07736ac-c40a-4b8d-b566-57aa5a9f23ec";
+    private ArrayList<HashMap<String, Double>> contactList;
+    private ProgressDialog pDialog;
+    private ListView lv;
 
 
 
@@ -126,7 +149,7 @@ public class MapFragment extends Fragment
         MyUrlTileProvider mTileProvider = new MyUrlTileProvider(256, 256, mUrl);
         mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mTileProvider)).setTransparency(0.5f);
         goToCurrentLocation();
-        drawPath();
+        new GetCoordinates().execute();
 
         //TODO check if permission was granted or not
 //        mMap.setOnCameraIdleListener(onCameraMoved);
@@ -160,19 +183,107 @@ public class MapFragment extends Fragment
     public void onLocationChanged(Location location) {
 
     }
+    //Chritopher Kawell, 12/5/2017
     //TODO: construct a url and request a JSON packet using HttpHandler.java.
     //TODO: parse the data and extract the coordinates.
     //TODO: store in a hashtable or arraylist.
     //TODO: display the coordinates as a polyline.
     public void drawPath(){
         PolylineOptions options = new PolylineOptions().width(5).color(Color.BLUE);
-        options.add(new LatLng(33.465143,-86.790402));
-        options.add(new LatLng(33.465152,-86.790383));
-        options.add(new LatLng(33.465405,-86.791424));
-        options.add(new LatLng(33.465583,-86.791531));
-        options.add(new LatLng(33.464955,-86.792956));
-        options.add(new LatLng(33.464950,-86.793053));
+        for (int i = 0; i < contactList.size(); i++) {
+            options.add(new LatLng(contactList.get(i).get("lat"),contactList.get(i).get("long")));
+        }
         line = mMap.addPolyline(options);
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private class GetCoordinates extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            //show loading dialog
+            pDialog = new ProgressDialog(getActivity().getApplicationContext());
+            pDialog.setMessage("loading...");
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            contactList = new ArrayList<>();
+            HttpHandler sh = new HttpHandler();
+
+            String jsonStr = sh.makeServiceCall(url);
+
+            Log.e(TAG, "Response from url: " + jsonStr);
+
+            if(jsonStr != null){
+                try{
+                    JSONObject jsonObject = new JSONObject(jsonStr);
+
+                    //getting json
+                    JSONArray paths = jsonObject.getJSONArray("paths");
+                    JSONObject instructions = paths.getJSONObject(0);
+                    JSONObject points = instructions.getJSONObject("points");
+                    JSONArray coordinates = points.getJSONArray("coordinates");
+
+                    //looping through all contacts
+                    for(int i = 0; i < coordinates.length(); i++){
+                        JSONArray c = coordinates.getJSONArray(i);
+//                        double[] c = (double[]) coordinates.get(i);
+
+                        double longitude = c.getDouble(0);
+                        double latitude = c.getDouble(1);
+
+                        HashMap<String, Double> contact = new HashMap<>();
+
+                        //adding each child node to hashmap
+                        contact.put("long", longitude);
+                        contact.put("lat", latitude);
+
+                        //adding contact to contact list
+                        contactList.add(contact);
+                    }
+                }catch (final JSONException e){
+                    Log.e(TAG, "JSON parsing error: " + e.getMessage());
+                    getActivity().runOnUiThread(new Runnable(){
+                        @Override
+                        public void run(){
+                            Toast.makeText(getContext(), "Json", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            } else {
+                Log.e(TAG, "Couldn't get json from server.");
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getContext(),
+                                "Couldn't get json from server.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            //Dismiss the dialog
+            if(pDialog.isShowing()){
+                pDialog.dismiss();
+            }
+
+            drawPath();
+
+            //updating json data to listView
+//            ListAdapter adapter = new SimpleAdapter(
+//                    getActivity(), contactList,
+//                    R.layout.list_item, new String[]{"long", "lat"},
+//                    new int[]{R.id.name, R.id.email2});
+//
+//            lv.setAdapter(adapter);
+        }
     }
 
     public void goToCurrentLocation() {

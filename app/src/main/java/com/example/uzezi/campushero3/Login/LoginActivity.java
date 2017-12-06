@@ -87,8 +87,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 @Override
                 public OkHttpClient createOkHttpClient() {
                     OkHttpClient client = new OkHttpClient();
-                    client.setReadTimeout(70, TimeUnit.SECONDS);
-                    client.setWriteTimeout(70, TimeUnit.SECONDS);
+                    client.setReadTimeout(40, TimeUnit.SECONDS);
+                    client.setWriteTimeout(40, TimeUnit.SECONDS);
                     return client;
                 }
             });
