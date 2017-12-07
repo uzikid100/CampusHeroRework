@@ -17,6 +17,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AutoCompleteTextView;
+import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -68,7 +70,8 @@ public class MapFragment extends Fragment
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         com.google.android.gms.location.LocationListener,
-        GoogleMap.OnPoiClickListener{
+        GoogleMap.OnPoiClickListener,
+        View.OnClickListener{
 
     protected final String TAG = "MapFragment";
 
@@ -77,18 +80,19 @@ public class MapFragment extends Fragment
     private LatLng DEFAULT_LOCATION = new LatLng(33.465004, -86.790231);
     private final int DEFAULT_ZOOM = 15;
     private final static int Fine_Location_Request_Code = 1; //arbitrary #
-    //
-    private String mUrl = "http://a.tile.openstreetmap.org/{z}/{x}/{y}.png";
-    //private String mUrl = "http://www.openstreetmap.org/#map={z}/{x}/{y}";
 
-//    private static String url = "http://api.androidhive.info/contacts/";
-//    ArrayList<HashMap<String, String>> contactList;
-//    ProgressDialog pDialog;
+    private String mTileUrl = "http://a.tile.openstreetmap.org/{z}/{x}/{y}.png";
 
-    private static String url = "https://graphhopper.com/api/1/route?point=33.465017%2C-86.790308&point=33.465271%2C-86.793076&vehicle=foot&points_encoded=false&type=json&locale=de&key=e07736ac-c40a-4b8d-b566-57aa5a9f23ec";
+    private static String mRouteUrl = "https://graphhopper.com/api/1/route?point={a}&point={b}&vehicle=foot&points_encoded=false&type=json&locale=de&key=e07736ac-c40a-4b8d-b566-57aa5a9f23ec";
+    //https://graphhopper.com/api/1/route?point=33.465017%2C-86.790308&point=33.465271%2C-86.793076&vehicle=foot&points_encoded=false&type=json&locale=de&key=e07736ac-c40a-4b8d-b566-57aa5a9f23ec
+    private String startingPoint;
+    private String destinationPoint;
+    private String[] srtCoordinatesStr;
+    private String[] endCoordinatesStr;
+    private AutoCompleteTextView startTV;
+    private AutoCompleteTextView endTV;
     private ArrayList<HashMap<String, Double>> contactList;
-    private ProgressDialog pDialog;
-    private ListView lv;
+    private ImageButton searchButton;
 
 
 
@@ -137,6 +141,9 @@ public class MapFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
+        searchButton = (ImageButton) getActivity().findViewById(R.id.invertTextButton);
+        searchButton.setOnClickListener(this);
+
         return view;
     }
 
@@ -146,14 +153,11 @@ public class MapFragment extends Fragment
         mMap = googleMap;
         setMapSettings();
         //
-        MyUrlTileProvider mTileProvider = new MyUrlTileProvider(256, 256, mUrl);
+        MyUrlTileProvider mTileProvider = new MyUrlTileProvider(256, 256, mTileUrl);
         mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mTileProvider)).setTransparency(0.5f);
         goToCurrentLocation();
-        new GetCoordinates().execute();
 
         //TODO check if permission was granted or not
-//        mMap.setOnCameraIdleListener(onCameraMoved);
-//        mMap.setO
     }
 
 
@@ -173,11 +177,7 @@ public class MapFragment extends Fragment
 
         //TODO try to setSupportActionBar if I can
         //TODO uISettings.setMapToolbarEnabled(true);
-        //((AppCompatActivity) getActivity()).setSupportActionBar();
-
     }
-
-
 
     @Override
     public void onLocationChanged(Location location) {
@@ -196,14 +196,31 @@ public class MapFragment extends Fragment
         line = mMap.addPolyline(options);
     }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.invertTextButton:
+                startTV = (AutoCompleteTextView) getActivity().findViewById(R.id.autoTvFrom);
+                startingPoint = startTV.getText().toString();
+                endTV = (AutoCompleteTextView) getActivity().findViewById(R.id.autoTvTo);
+                destinationPoint = endTV.getText().toString();
+                srtCoordinatesStr = startingPoint.split(" ");
+                endCoordinatesStr = destinationPoint.split(" ");
+
+                new GetCoordinates().execute();
+                break;
+        }
+    }
+
     @SuppressLint("StaticFieldLeak")
     private class GetCoordinates extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            //show loading dialog
-            pDialog = new ProgressDialog(getActivity().getApplicationContext());
-            pDialog.setMessage("loading...");
+            startingPoint = srtCoordinatesStr[0] + "%2C" + srtCoordinatesStr[1];
+            destinationPoint = endCoordinatesStr[0] + "%2C" + endCoordinatesStr[1];
+            mRouteUrl = mRouteUrl.replace("{a}", startingPoint);
+            mRouteUrl =  mRouteUrl.replace("{b}", destinationPoint);
         }
 
         @Override
@@ -211,7 +228,7 @@ public class MapFragment extends Fragment
             contactList = new ArrayList<>();
             HttpHandler sh = new HttpHandler();
 
-            String jsonStr = sh.makeServiceCall(url);
+            String jsonStr = sh.makeServiceCall(mRouteUrl);
 
             Log.e(TAG, "Response from url: " + jsonStr);
 
@@ -228,7 +245,6 @@ public class MapFragment extends Fragment
                     //looping through all contacts
                     for(int i = 0; i < coordinates.length(); i++){
                         JSONArray c = coordinates.getJSONArray(i);
-//                        double[] c = (double[]) coordinates.get(i);
 
                         double longitude = c.getDouble(0);
                         double latitude = c.getDouble(1);
@@ -269,20 +285,7 @@ public class MapFragment extends Fragment
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            //Dismiss the dialog
-            if(pDialog.isShowing()){
-                pDialog.dismiss();
-            }
-
             drawPath();
-
-            //updating json data to listView
-//            ListAdapter adapter = new SimpleAdapter(
-//                    getActivity(), contactList,
-//                    R.layout.list_item, new String[]{"long", "lat"},
-//                    new int[]{R.id.name, R.id.email2});
-//
-//            lv.setAdapter(adapter);
         }
     }
 
@@ -293,8 +296,11 @@ public class MapFragment extends Fragment
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ll, DEFAULT_ZOOM));
             mMap.addMarker(new MarkerOptions().position(ll)
                     .title("You"));
+        }else{
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, DEFAULT_ZOOM));
+            mMap.addMarker(new MarkerOptions().position(DEFAULT_LOCATION)
+                    .title("You"));
         }
-        //TODO: else move map to DEFAULT_POSITION
     }
 
     @Override
