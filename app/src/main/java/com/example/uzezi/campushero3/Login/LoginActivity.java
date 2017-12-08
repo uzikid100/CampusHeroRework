@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,7 +12,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,9 +20,9 @@ import android.widget.ProgressBar;
 import com.example.uzezi.campushero3.Classes;
 import com.example.uzezi.campushero3.DatabaseHelper;
 import com.example.uzezi.campushero3.MainActivity;
+import com.example.uzezi.campushero3.PointsOfInterest;
 import com.example.uzezi.campushero3.R;
 import com.example.uzezi.campushero3.Student;
-import com.example.uzezi.campushero3.StudentToClass;
 import com.example.uzezi.campushero3.UiErrorLog;
 import com.microsoft.windowsazure.mobileservices.http.OkHttpClientFactory;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
@@ -56,8 +54,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private MobileServiceClient mClient;
     private MobileServiceTable<Student> mUserTable;
     private MobileServiceTable<Classes> mClassTable;
+    private MobileServiceTable<PointsOfInterest> mPOITable;
     private Student mStudent = new Student();
     private Classes mClass = new Classes();
+    private PointsOfInterest mPoi = new PointsOfInterest();
 
     private Context mContext;
     private AlertDialog mAlertDialog;
@@ -66,6 +66,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private UiErrorLog mLogger;
     public ArrayList<Student> mStudents = new ArrayList<>();
     public ArrayList<Classes> mClasses = new ArrayList<>();
+    public ArrayList<PointsOfInterest> mPOIs = new ArrayList<>();
 
     public DatabaseHelper db = new DatabaseHelper(this);
 
@@ -96,6 +97,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
             mUserTable = mClient.getTable(Student.class);
             mClassTable = mClient.getTable(Classes.class);
+            mPOITable = mClient.getTable(PointsOfInterest.class);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -351,10 +353,42 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     if(id.length() == 0) {
                         db.InsertStudent(mStudent);
                         db.InsertClasses(mClasses);
+                        for (int i = 0; i < mPOIs.size(); i++) {
+                            db.InsertPoi(mPOIs.get(i));
+                        }
                     }
                     mProgressBar2.setProgress(75);
                     startMainActivity();
             }
+
+        };
+        runAsyncTask(classes);
+    }
+
+    private void getPOIs(){
+        if(mClient == null){
+            return;
+        }
+
+        @SuppressLint("StaticFieldLeak")
+        final AsyncTask<Void, Void, Void> classes = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    mPOIs = mPOITable.select().execute().get();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+
+                return null;
+            }
+            @Override
+            protected void onPostExecute(Void result){
+                getClasses();
+                mProgressBar2.setProgress(85);
+                }
 
         };
         runAsyncTask(classes);
@@ -408,7 +442,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     if (mStudent.getMpassword().equals(mPassword.getText().toString())) {
                         //db.InsertStudent(mStudent);
                         mProgressBar2.setProgress(50);
-                        getClasses();
+                        getPOIs();
                     }
                     else {
                         mToast.makeText(mContext, "Wrong password", Toast.LENGTH_SHORT).show();

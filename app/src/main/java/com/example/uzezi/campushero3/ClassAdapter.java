@@ -1,17 +1,11 @@
 package com.example.uzezi.campushero3;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
 import android.widget.TextView;
-
-import com.example.uzezi.campushero3.Classes;
-import com.example.uzezi.campushero3.R;
 
 import java.util.ArrayList;
 
@@ -33,13 +27,8 @@ public class ClassAdapter extends BaseAdapter {
     int mLayoutResourceId;
 
     public ClassAdapter(Context context, ArrayList<Classes> results) {
-        //super(context, layoutResourceId);
-
-        //mContext = context;
         listContact = results;
-        //mLayoutResourceId = layoutResourceId;
         mInflater = LayoutInflater.from(context);
-        //mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override

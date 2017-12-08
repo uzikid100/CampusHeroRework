@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import java.security.acl.Owner;
 import java.util.ArrayList;
 
 /**
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private static final  int DATABASE_VERSION = 18;
+    private static final  int DATABASE_VERSION = 20;
 
     static final String dbName = "campushero";
 
@@ -50,6 +49,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     static final String class_StudentId = "studentId";
     static final String class_BuildingId = "buildingId";
 
+    //variable names for the POI table columns.
+    static final String poi_Table = "PointsOfInterest";
+    static final String poi_ID = "id";
+    static final String poi_CreatedAt = "createdAt";
+    static final String poi_UpdatedAt = "updatedAt";
+    static final String poi_Version = "version";
+    static final String poi_Deleted = "deleted";
+    static final String poi_Longitude = "longitude";
+    static final String poi_Latitude= "latitude";
+    static final String poi_SimpleName = "simpleName";
+
 
     static final String viewStudents = "ViewStudents";
 
@@ -68,6 +78,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 " TEXT, "+student_Password+" TEXT, "+student_GPA+" TEXT, "+student_ProfilePicture+
                 " TEXT, "+student_SchoolId+" TEXT)");
 
+        db.execSQL("CREATE TABLE IF NOT EXISTS "+poi_Table+" ("+poi_ID+ " TEXT, "+
+                poi_CreatedAt+ " TEXT, "+poi_UpdatedAt+" TEXT, "+poi_Version+
+                " TEXT ,"+poi_Deleted+ " BOOLEAN, "+
+                poi_Longitude+ " TEXT, "+poi_Latitude+
+                " TEXT, "+poi_SimpleName+
+                " TEXT)");
+
         db.execSQL("CREATE TABLE IF NOT EXISTS "+class_Table+" ("+class_ID+ " TEXT, "+
                 class_CreatedAt+ " TEXT, "+class_UpdatedAt+" TEXT, "+class_Version+
                 " TEXT ,"+class_Deleted+ " BOOLEAN, "+
@@ -75,10 +92,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 " TEXT, "+class_StartTime+" TEXT, "+class_SimpleName+
                 " TEXT, "+class_BuildingId+" TEXT, "+class_StudentId+" TEXT)");
 
-
-
-        //Inserts pre-defined departments
-        //InsertDepts(db);
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -86,6 +99,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         db.execSQL("DROP TABLE IF EXISTS "+student_Table);
         db.execSQL("DROP TABLE IF EXISTS "+class_Table);
+        db.execSQL("DROP TABLE IF EXISTS "+poi_Table);
         //db.execSQL("DROP TABLE IF EXISTS "+studentToClass_Table);
 
         //db.execSQL("DROP TRIGGER IF EXISTS fk_studenttoclass_classid");
@@ -109,6 +123,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if(studentId != getFirstStudent().getId()){
             db.execSQL("DROP TABLE IF EXISTS "+student_Table);
             db.execSQL("DROP TABLE IF EXISTS "+class_Table);
+            db.execSQL("DROP TABLE IF EXISTS "+poi_Table);
             onCreate(db);
         }
     }
@@ -122,6 +137,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(student_Password, student.getMpassword());
         cv.put(student_Email, student.getMemail());
         db.insert(student_Table, null, cv);
+        db.close();
+    }
+
+    public void InsertPoi(PointsOfInterest poi)
+    {
+        SQLiteDatabase db=this.getWritableDatabase();
+
+        ContentValues cv=new ContentValues();
+        cv.put(poi_ID, poi.getId());
+        cv.put(poi_Longitude, poi.getMlongitude());
+        cv.put(poi_Latitude, poi.getMlatitude());
+        cv.put(poi_SimpleName, poi.getMsimpleName());
+        db.insert(poi_Table, null, cv);
         db.close();
     }
 
@@ -156,6 +184,39 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     Student student = new Student(cur.getString(0), cur.getString(1), cur.getString(2));
         cur.close();
         return student;
+    }
+
+    public PointsOfInterest getPoi(String index)
+    {
+        SQLiteDatabase db=this.getReadableDatabase();
+
+        Cursor cur=db.query(poi_Table, new String[] {poi_ID, poi_Longitude, poi_Latitude, poi_SimpleName}, poi_ID + "=?",
+                new String[]{index}, null, null, null, null);
+        if (cur != null)
+            cur.moveToFirst();
+
+        PointsOfInterest poi = new PointsOfInterest(cur.getString(0), cur.getString(1), cur.getString(2), cur.getString(3));
+        cur.close();
+        return poi;
+    }
+
+
+    public PointsOfInterest getFirstPoi()
+    {
+        SQLiteDatabase db=this.getReadableDatabase();
+        PointsOfInterest poi = new PointsOfInterest();
+
+        Cursor cur=db.query(poi_Table, new String[] {poi_ID, poi_Longitude, poi_Latitude, poi_SimpleName}, null,
+                new String[]{}, null, null, null, null);
+        if (cur != null) {
+            cur.moveToFirst();
+            int colCount = cur.getCount();
+            if(colCount != 0){
+                poi = new PointsOfInterest(cur.getString(0), cur.getString(1), cur.getString(2), cur.getString(3));
+            }
+        }
+        cur.close();
+        return poi;
     }
 
     public Student getFirstStudent()
