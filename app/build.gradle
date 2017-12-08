@@ -50,4 +50,30 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp:2.5.0'
     compile 'com.microsoft.azure:azure-mobile-android:3.2.0@aar'
     compile 'com.microsoft.azure:azure-notifications-handler:1.0.1@jar'
+
+
+//    //OpenStreetMap API
+//    implementation 'org.mapsforge:mapsforge-map-android:0.8.0'
+//    implementation 'com.caverock:androidsvg:1.2.2-beta-1'
+//    implementation 'org.mapsforge:mapsforge-poi-android:0.8.0'
+//    implementation 'org.mapsforge:spatialite-android:0.8.0'
+//    implementation 'org.mapsforge:spatialite-android:0.8.0:natives-armeabi'
+//    implementation 'org.mapsforge:spatialite-android:0.8.0:natives-armeabi-v7a'
+//    implementation 'org.mapsforge:spatialite-android:0.8.0:natives-x86'
+//    implementation 'com.google.android.gms:play-services-maps:11.6.0'
+//
+//    implementation 'org.mapsforge:mapsforge-core:0.8.0'
+//    implementation 'org.mapsforge:mapsforge-map:0.8.0'
+//    implementation 'org.mapsforge:mapsforge-map-reader:0.8.0'
+//    implementation 'org.mapsforge:mapsforge-themes:0.8.0'
+//    implementation 'net.sf.kxml:kxml2:2.3.0'
+//    implementation 'org.mapsforge:mapsforge-core:0.8.0'
+//    implementation 'org.mapsforge:mapsforge-poi:0.8.0'
+//
+//    //for desktop use
+//    implementation 'org.mapsforge:mapsforge-map-awt:0.8.0'
+//    implementation 'com.metsci.ext.com.kitfox.svg:svg-salamander:0.1.19'
+//    implementation 'org.mapsforge:mapsforge-poi-awt:0.8.0'
+//    implementation 'org.xerial:sqlite-jdbc:3.20.0'
+
 }

@@ -13,6 +13,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -86,8 +87,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 @Override
                 public OkHttpClient createOkHttpClient() {
                     OkHttpClient client = new OkHttpClient();
-                    client.setReadTimeout(70, TimeUnit.SECONDS);
-                    client.setWriteTimeout(70, TimeUnit.SECONDS);
+                    client.setReadTimeout(40, TimeUnit.SECONDS);
+                    client.setWriteTimeout(40, TimeUnit.SECONDS);
                     return client;
                 }
             });

@@ -1,9 +1,13 @@
 package com.example.uzezi.campushero3.Fragments;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,8 +17,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AutoCompleteTextView;
+import android.widget.ImageButton;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
+import com.example.uzezi.campushero3.HttpHandler;
+import com.example.uzezi.campushero3.MainActivity;
+import com.example.uzezi.campushero3.MyUrlTileProvider;
 import com.example.uzezi.campushero3.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -38,6 +50,16 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PointOfInterest;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.TileOverlayOptions;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 //
 //TODO implement google 'PlacesService', 'DirectionService,' and 'DirectionRenderer'
@@ -48,14 +70,31 @@ public class MapFragment extends Fragment
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         com.google.android.gms.location.LocationListener,
-        GoogleMap.OnPoiClickListener{
+        GoogleMap.OnPoiClickListener,
+        View.OnClickListener{
 
     protected final String TAG = "MapFragment";
 
     private GoogleMap mMap;
+    private Polyline line;
     private LatLng DEFAULT_LOCATION = new LatLng(33.465004, -86.790231);
     private final int DEFAULT_ZOOM = 15;
     private final static int Fine_Location_Request_Code = 1; //arbitrary #
+
+    private String mTileUrl = "http://a.tile.openstreetmap.org/{z}/{x}/{y}.png";
+
+    private static String mRouteUrl = "https://graphhopper.com/api/1/route?point={a}&point={b}&vehicle=foot&points_encoded=false&type=json&locale=de&key=e07736ac-c40a-4b8d-b566-57aa5a9f23ec";
+    //https://graphhopper.com/api/1/route?point=33.465017%2C-86.790308&point=33.465271%2C-86.793076&vehicle=foot&points_encoded=false&type=json&locale=de&key=e07736ac-c40a-4b8d-b566-57aa5a9f23ec
+    private String startingPoint;
+    private String destinationPoint;
+    private String[] srtCoordinatesStr;
+    private String[] endCoordinatesStr;
+    private AutoCompleteTextView startTV;
+    private AutoCompleteTextView endTV;
+    private ArrayList<HashMap<String, Double>> contactList;
+    private ImageButton searchButton;
+
+
 
     private LocationRequest mLocationRequest;
     private Location mLastKnownLocation;
@@ -78,7 +117,8 @@ public class MapFragment extends Fragment
 
         SupportPlaceAutocompleteFragment supportPlaceAutocompleteFragment = (SupportPlaceAutocompleteFragment) getFragmentManager()
                 .findFragmentById(R.id.place_autocomplete_fragment);
-        
+
+
         mFusedLocationApi = LocationServices.FusedLocationApi;
         mContext = this.getActivity().getApplicationContext();
 
@@ -95,14 +135,15 @@ public class MapFragment extends Fragment
         mLocationRequest.setInterval(1000);
         mLocationRequest.setFastestInterval(1000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
+        searchButton = (ImageButton) getActivity().findViewById(R.id.invertTextButton);
+        searchButton.setOnClickListener(this);
+
         return view;
     }
 
@@ -111,10 +152,12 @@ public class MapFragment extends Fragment
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         setMapSettings();
+        //
+        MyUrlTileProvider mTileProvider = new MyUrlTileProvider(256, 256, mTileUrl);
+        mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mTileProvider)).setTransparency(0.5f);
         goToCurrentLocation();
+
         //TODO check if permission was granted or not
-//        mMap.setOnCameraIdleListener(onCameraMoved);
-//        mMap.setO
     }
 
 
@@ -129,20 +172,121 @@ public class MapFragment extends Fragment
             mMap.setMyLocationEnabled(true);
         }
         else {
-        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Fine_Location_Request_Code);
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Fine_Location_Request_Code);
         }
 
         //TODO try to setSupportActionBar if I can
         //TODO uISettings.setMapToolbarEnabled(true);
-        //((AppCompatActivity) getActivity()).setSupportActionBar();
-
     }
-
-
 
     @Override
     public void onLocationChanged(Location location) {
 
+    }
+    //Chritopher Kawell, 12/5/2017
+    //TODO: construct a url and request a JSON packet using HttpHandler.java.
+    //TODO: parse the data and extract the coordinates.
+    //TODO: store in a hashtable or arraylist.
+    //TODO: display the coordinates as a polyline.
+    public void drawPath(){
+        PolylineOptions options = new PolylineOptions().width(5).color(Color.BLUE);
+        for (int i = 0; i < contactList.size(); i++) {
+            options.add(new LatLng(contactList.get(i).get("lat"),contactList.get(i).get("long")));
+        }
+        line = mMap.addPolyline(options);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.invertTextButton:
+                startTV = (AutoCompleteTextView) getActivity().findViewById(R.id.autoTvFrom);
+                startingPoint = startTV.getText().toString();
+                endTV = (AutoCompleteTextView) getActivity().findViewById(R.id.autoTvTo);
+                destinationPoint = endTV.getText().toString();
+                srtCoordinatesStr = startingPoint.split(" ");
+                endCoordinatesStr = destinationPoint.split(" ");
+
+                new GetCoordinates().execute();
+                break;
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private class GetCoordinates extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            startingPoint = srtCoordinatesStr[0] + "%2C" + srtCoordinatesStr[1];
+            destinationPoint = endCoordinatesStr[0] + "%2C" + endCoordinatesStr[1];
+            mRouteUrl = mRouteUrl.replace("{a}", startingPoint);
+            mRouteUrl =  mRouteUrl.replace("{b}", destinationPoint);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            contactList = new ArrayList<>();
+            HttpHandler sh = new HttpHandler();
+
+            String jsonStr = sh.makeServiceCall(mRouteUrl);
+
+            Log.e(TAG, "Response from url: " + jsonStr);
+
+            if(jsonStr != null){
+                try{
+                    JSONObject jsonObject = new JSONObject(jsonStr);
+
+                    //getting json
+                    JSONArray paths = jsonObject.getJSONArray("paths");
+                    JSONObject instructions = paths.getJSONObject(0);
+                    JSONObject points = instructions.getJSONObject("points");
+                    JSONArray coordinates = points.getJSONArray("coordinates");
+
+                    //looping through all contacts
+                    for(int i = 0; i < coordinates.length(); i++){
+                        JSONArray c = coordinates.getJSONArray(i);
+
+                        double longitude = c.getDouble(0);
+                        double latitude = c.getDouble(1);
+
+                        HashMap<String, Double> contact = new HashMap<>();
+
+                        //adding each child node to hashmap
+                        contact.put("long", longitude);
+                        contact.put("lat", latitude);
+
+                        //adding contact to contact list
+                        contactList.add(contact);
+                    }
+                }catch (final JSONException e){
+                    Log.e(TAG, "JSON parsing error: " + e.getMessage());
+                    getActivity().runOnUiThread(new Runnable(){
+                        @Override
+                        public void run(){
+                            Toast.makeText(getContext(), "Json", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            } else {
+                Log.e(TAG, "Couldn't get json from server.");
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getContext(),
+                                "Couldn't get json from server.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            drawPath();
+        }
     }
 
     public void goToCurrentLocation() {
@@ -152,8 +296,11 @@ public class MapFragment extends Fragment
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ll, DEFAULT_ZOOM));
             mMap.addMarker(new MarkerOptions().position(ll)
                     .title("You"));
+        }else{
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, DEFAULT_ZOOM));
+            mMap.addMarker(new MarkerOptions().position(DEFAULT_LOCATION)
+                    .title("You"));
         }
-        //TODO: else move map to DEFAULT_POSITION
     }
 
     @Override
@@ -258,3 +405,4 @@ public class MapFragment extends Fragment
         Toast.makeText(mContext, pointOfInterest.name, Toast.LENGTH_SHORT).show();
     }
 }
+

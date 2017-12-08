@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.fabMapType:
                 if(fabExpanded) {closeSubMenusFab();}
-                  else {openSubMenusFab();}
+                else {openSubMenusFab();}
                 break;
 //            case R.id.fabLocation:
 //                mMapFragment.goToCurrentLocation();
