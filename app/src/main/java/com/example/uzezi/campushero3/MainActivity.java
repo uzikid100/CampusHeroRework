@@ -8,6 +8,7 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.view.View;
 
+import android.widget.AutoCompleteTextView;
 import android.widget.LinearLayout;
 
 import com.example.uzezi.campushero3.Fragments.MapFragment;
@@ -88,6 +89,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         fabHybrid.setOnClickListener(this);
         fabTerrain.setOnClickListener(this);
         fabSatellite.setOnClickListener(this);
+
+        //
+//        setStart();
 
         closeSubMenusFab();
 
@@ -177,6 +181,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        }
 //
 //        return super.onOptionsItemSelected(item);
+//    }
+//
+//    public void setStart(){
+//        DatabaseHelper db = new DatabaseHelper(this);
+//        String start = db.getFirstPoi().getMsimpleName();
+//        AutoCompleteTextView startTV = (AutoCompleteTextView) findViewById(R.id.autoTvFrom);
+//        startTV.setHint(start);
 //    }
 
     @Override
