@@ -186,12 +186,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return student;
     }
 
-    public PointsOfInterest getPoi(String index)
+    public PointsOfInterest getPoi(String name)
     {
         SQLiteDatabase db=this.getReadableDatabase();
 
-        Cursor cur=db.query(poi_Table, new String[] {poi_ID, poi_Longitude, poi_Latitude, poi_SimpleName}, poi_ID + "=?",
-                new String[]{index}, null, null, null, null);
+        Cursor cur=db.query(poi_Table, new String[] {poi_ID, poi_Longitude, poi_Latitude, poi_SimpleName}, poi_SimpleName + "=?",
+                new String[]{name}, null, null, null, null);
         if (cur != null)
             cur.moveToFirst();
 

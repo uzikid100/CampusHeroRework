@@ -24,9 +24,11 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
+import com.example.uzezi.campushero3.DatabaseHelper;
 import com.example.uzezi.campushero3.HttpHandler;
 import com.example.uzezi.campushero3.MainActivity;
 import com.example.uzezi.campushero3.MyUrlTileProvider;
+import com.example.uzezi.campushero3.PointsOfInterest;
 import com.example.uzezi.campushero3.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -82,8 +84,8 @@ public class MapFragment extends Fragment
     private final static int Fine_Location_Request_Code = 1; //arbitrary #
 
     private String mTileUrl = "http://a.tile.openstreetmap.org/{z}/{x}/{y}.png";
-
-    private static String mRouteUrl = "https://graphhopper.com/api/1/route?point={a}&point={b}&vehicle=foot&points_encoded=false&type=json&locale=de&key=e07736ac-c40a-4b8d-b566-57aa5a9f23ec";
+    private static String routeUrlTemplate = "https://graphhopper.com/api/1/route?point={a}&point={b}&vehicle=foot&points_encoded=false&type=json&locale=de&key=e07736ac-c40a-4b8d-b566-57aa5a9f23ec";
+    private static String mRouteUrl;
     //https://graphhopper.com/api/1/route?point=33.465017%2C-86.790308&point=33.465271%2C-86.793076&vehicle=foot&points_encoded=false&type=json&locale=de&key=e07736ac-c40a-4b8d-b566-57aa5a9f23ec
     private String startingPoint;
     private String destinationPoint;
@@ -93,6 +95,7 @@ public class MapFragment extends Fragment
     private AutoCompleteTextView endTV;
     private ArrayList<HashMap<String, Double>> contactList;
     private ImageButton searchButton;
+    private DatabaseHelper db;
 
 
 
@@ -141,6 +144,7 @@ public class MapFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
+        mRouteUrl = routeUrlTemplate;
         searchButton = (ImageButton) getActivity().findViewById(R.id.invertTextButton);
         searchButton.setOnClickListener(this);
 
@@ -189,6 +193,8 @@ public class MapFragment extends Fragment
     //TODO: store in a hashtable or arraylist.
     //TODO: display the coordinates as a polyline.
     public void drawPath(){
+        if(line != null)
+            line.remove();
         PolylineOptions options = new PolylineOptions().width(5).color(Color.BLUE);
         for (int i = 0; i < contactList.size(); i++) {
             options.add(new LatLng(contactList.get(i).get("lat"),contactList.get(i).get("long")));
@@ -204,8 +210,8 @@ public class MapFragment extends Fragment
                 startingPoint = startTV.getText().toString();
                 endTV = (AutoCompleteTextView) getActivity().findViewById(R.id.autoTvTo);
                 destinationPoint = endTV.getText().toString();
-                srtCoordinatesStr = startingPoint.split(" ");
-                endCoordinatesStr = destinationPoint.split(" ");
+//                srtCoordinatesStr = startingPoint.split(" ");
+//                endCoordinatesStr = destinationPoint.split(" ");
 
                 new GetCoordinates().execute();
                 break;
@@ -217,8 +223,12 @@ public class MapFragment extends Fragment
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            startingPoint = srtCoordinatesStr[0] + "%2C" + srtCoordinatesStr[1];
-            destinationPoint = endCoordinatesStr[0] + "%2C" + endCoordinatesStr[1];
+            db = new DatabaseHelper(mContext);
+            PointsOfInterest startPoi = db.getPoi(startingPoint);
+            PointsOfInterest endPoi = db.getPoi(destinationPoint);
+
+            startingPoint = startPoi.getMlatitude() + "%2C" + startPoi.getMlongitude();
+            destinationPoint = endPoi.getMlatitude() + "%2C" + endPoi.getMlongitude();
             mRouteUrl = mRouteUrl.replace("{a}", startingPoint);
             mRouteUrl =  mRouteUrl.replace("{b}", destinationPoint);
         }
@@ -286,7 +296,12 @@ public class MapFragment extends Fragment
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             drawPath();
+            resetRoutUrl();
         }
+    }
+
+    public void resetRoutUrl(){
+        mRouteUrl = routeUrlTemplate;
     }
 
     public void goToCurrentLocation() {
