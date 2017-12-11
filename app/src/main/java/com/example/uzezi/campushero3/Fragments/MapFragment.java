@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.ListAdapter;
@@ -144,7 +145,14 @@ public class MapFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
+        db = new DatabaseHelper(getActivity());
         mRouteUrl = routeUrlTemplate;
+        startTV = (AutoCompleteTextView) getActivity().findViewById(R.id.autoTvFrom);
+        endTV = (AutoCompleteTextView) getActivity().findViewById(R.id.autoTvTo);
+        String[] POIs = db.getAllPois();
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_dropdown_item_1line, POIs);
+        startTV.setAdapter(adapter);
+        endTV.setAdapter(adapter);
         searchButton = (ImageButton) getActivity().findViewById(R.id.invertTextButton);
         searchButton.setOnClickListener(this);
 
@@ -206,9 +214,9 @@ public class MapFragment extends Fragment
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.invertTextButton:
-                startTV = (AutoCompleteTextView) getActivity().findViewById(R.id.autoTvFrom);
+//                startTV = (AutoCompleteTextView) getActivity().findViewById(R.id.autoTvFrom);
                 startingPoint = startTV.getText().toString();
-                endTV = (AutoCompleteTextView) getActivity().findViewById(R.id.autoTvTo);
+//                endTV = (AutoCompleteTextView) getActivity().findViewById(R.id.autoTvTo);
                 destinationPoint = endTV.getText().toString();
 //                srtCoordinatesStr = startingPoint.split(" ");
 //                endCoordinatesStr = destinationPoint.split(" ");
@@ -223,7 +231,6 @@ public class MapFragment extends Fragment
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            db = new DatabaseHelper(mContext);
             PointsOfInterest startPoi = db.getPoi(startingPoint);
             PointsOfInterest endPoi = db.getPoi(destinationPoint);
 
@@ -309,12 +316,12 @@ public class MapFragment extends Fragment
         if (mLastKnownLocation != null) {
             LatLng ll = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ll, DEFAULT_ZOOM));
-            mMap.addMarker(new MarkerOptions().position(ll)
-                    .title("You"));
+//            mMap.addMarker(new MarkerOptions().position(ll)
+//                    .title("You"));
         }else{
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, DEFAULT_ZOOM));
-            mMap.addMarker(new MarkerOptions().position(DEFAULT_LOCATION)
-                    .title("You"));
+//            mMap.addMarker(new MarkerOptions().position(DEFAULT_LOCATION)
+//                    .title("You"));
         }
     }
 
@@ -413,6 +420,7 @@ public class MapFragment extends Fragment
     public void onStop() {
         super.onStop();
         mGoogleApiClient.disconnect();
+        db.close();
     }
 
     @Override
