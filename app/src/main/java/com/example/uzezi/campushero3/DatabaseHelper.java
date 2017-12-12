@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private static final  int DATABASE_VERSION = 20;
+    private static final  int DATABASE_VERSION = 21;
 
     static final String dbName = "campushero";
 
@@ -186,12 +186,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return student;
     }
 
-    public PointsOfInterest getPoi(String index)
+    public PointsOfInterest getPoi(String name)
     {
         SQLiteDatabase db=this.getReadableDatabase();
 
-        Cursor cur=db.query(poi_Table, new String[] {poi_ID, poi_Longitude, poi_Latitude, poi_SimpleName}, poi_ID + "=?",
-                new String[]{index}, null, null, null, null);
+        Cursor cur=db.query(poi_Table, new String[] {poi_ID, poi_Longitude, poi_Latitude, poi_SimpleName}, poi_SimpleName + "=?",
+                new String[]{name}, null, null, null, null);
         if (cur != null)
             cur.moveToFirst();
 
@@ -217,6 +217,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         cur.close();
         return poi;
+    }
+
+    public String[] getAllPois()
+    {
+        SQLiteDatabase db=this.getReadableDatabase();
+        String[] names = new String[]{};
+        Cursor cur=db.query(poi_Table, new String[] {poi_SimpleName}, null,
+                null, null, null, null, null);
+        if (cur != null) {
+            names = new String[cur.getCount()];
+            cur.moveToFirst();
+            int colCount = cur.getCount();
+            for (int i = 0; i < colCount; i++) {
+                names[i] = cur.getString(0);
+                cur.moveToNext();
+            }
+        }
+        cur.close();
+        return names;
     }
 
     public Student getFirstStudent()
@@ -250,9 +269,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         }
         db.close();
-
         return id;
-
     }
 
     public void InsertClasses(ArrayList<Classes> classes) {

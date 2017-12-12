@@ -1,18 +1,12 @@
 package com.example.uzezi.campushero3.Fragments;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -47,7 +41,7 @@ public class ProfileFragment extends Fragment {
         noItems = (TextView) view.findViewById(R.id.noItems_tv);
         noItems.setVisibility(noItems.GONE);
 
-        ArrayList<Classes> listContact = GetlistContact();
+        ArrayList<Classes> listContact = GetlistClasses();
         if(listContact.isEmpty())
             noItems.setVisibility(noItems.VISIBLE);
         ListView lv = (ListView)view.findViewById(R.id.List1);
@@ -57,13 +51,19 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
-    private ArrayList<Classes> GetlistContact(){
+    private ArrayList<Classes> GetlistClasses(){
         db = new DatabaseHelper(context);
-        ArrayList<Classes> contactlist = new ArrayList<>();
+        ArrayList<Classes> classeslist = new ArrayList<>();
         String studentId = db.getFirstStudent().getId();
-        contactlist = db.getUserClasses(studentId);
+        if(studentId.equals(""))
+            try {
+                wait(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        classeslist = db.getUserClasses(studentId);
 
-        return contactlist;
+        return classeslist;
     }
 
 }

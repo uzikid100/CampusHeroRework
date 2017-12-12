@@ -353,10 +353,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     if(id.length() == 0) {
                         db.InsertStudent(mStudent);
                         db.InsertClasses(mClasses);
-                        for (int i = 0; i < mPOIs.size(); i++) {
-                            db.InsertPoi(mPOIs.get(i));
-                        }
                     }
+                for (int i = 0; i < mPOIs.size(); i++) {
+                    db.InsertPoi(mPOIs.get(i));
+                }
                     mProgressBar2.setProgress(75);
                     startMainActivity();
             }
