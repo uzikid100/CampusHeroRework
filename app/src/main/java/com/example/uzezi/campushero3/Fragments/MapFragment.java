@@ -150,7 +150,7 @@ public class MapFragment extends Fragment
         startTV = (AutoCompleteTextView) getActivity().findViewById(R.id.autoTvFrom);
         endTV = (AutoCompleteTextView) getActivity().findViewById(R.id.autoTvTo);
         String[] POIs = db.getAllPois();
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_dropdown_item_1line, POIs);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.drop_down_layout, POIs);
         startTV.setAdapter(adapter);
         endTV.setAdapter(adapter);
         searchButton = (ImageButton) getActivity().findViewById(R.id.invertTextButton);
