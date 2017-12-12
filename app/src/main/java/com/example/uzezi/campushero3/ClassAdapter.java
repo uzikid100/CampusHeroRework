@@ -78,25 +78,3 @@ public class ClassAdapter extends BaseAdapter {
         TextView txtname, txttime;
     }
 }
-/*
-@Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        //View row = convertView;
-        View v = mInflater.inflate(R.layout.class_list_layout, null);
-        /*
-        final Classes currentClass = getItem(position);
-
-        if (row == null) {
-            LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
-            row = inflater.inflate(mLayoutResourceId, parent, false);
-        }
-
-        row.setTag(currentClass);
-
-TextView title = (TextView) v.findViewById(R.id.titleTextView);
-        title.setText("erwatasdg");
-                ///title.setText(currentClass.getMsimpleName());
-
-                return v;
-                }
- */

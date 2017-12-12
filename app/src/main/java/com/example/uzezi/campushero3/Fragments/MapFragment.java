@@ -2,7 +2,6 @@ package com.example.uzezi.campushero3.Fragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -20,14 +19,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import com.example.uzezi.campushero3.DatabaseHelper;
 import com.example.uzezi.campushero3.HttpHandler;
-import com.example.uzezi.campushero3.MainActivity;
 import com.example.uzezi.campushero3.MyUrlTileProvider;
 import com.example.uzezi.campushero3.PointsOfInterest;
 import com.example.uzezi.campushero3.R;
@@ -39,19 +34,13 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
-import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.location.places.ui.SupportPlaceAutocompleteFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PointOfInterest;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -92,7 +81,7 @@ public class MapFragment extends Fragment
     private String destinationPoint;
     private AutoCompleteTextView startTV;
     private AutoCompleteTextView endTV;
-    private ArrayList<HashMap<String, Double>> contactList;
+    private ArrayList<HashMap<String, Double>> coordinatesList;
     private ImageButton searchButton;
     private DatabaseHelper db;
 
@@ -160,11 +149,9 @@ public class MapFragment extends Fragment
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         setMapSettings();
-        //
-        //MyUrlTileProvider mTileProvider = new MyUrlTileProvider(256, 256, mTileUrl);
-        //mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mTileProvider)).setTransparency(0.5f);
+//        MyUrlTileProvider mTileProvider = new MyUrlTileProvider(256, 256, mTileUrl);
+//        mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mTileProvider)).setTransparency(0.5f);
         goToCurrentLocation();
-
         //TODO check if permission was granted or not
     }
 
@@ -200,8 +187,8 @@ public class MapFragment extends Fragment
         if(line != null)
             line.remove();
         PolylineOptions options = new PolylineOptions().width(5).color(Color.BLUE);
-        for (int i = 0; i < contactList.size(); i++) {
-            options.add(new LatLng(contactList.get(i).get("lat"),contactList.get(i).get("long")));
+        for (int i = 0; i < coordinatesList.size(); i++) {
+            options.add(new LatLng(coordinatesList.get(i).get("lat"), coordinatesList.get(i).get("long")));
         }
         line = mMap.addPolyline(options);
     }
@@ -210,12 +197,8 @@ public class MapFragment extends Fragment
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.invertTextButton:
-//                startTV = (AutoCompleteTextView) getActivity().findViewById(R.id.autoTvFrom);
                 startingPoint = startTV.getText().toString();
-//                endTV = (AutoCompleteTextView) getActivity().findViewById(R.id.autoTvTo);
                 destinationPoint = endTV.getText().toString();
-//                srtCoordinatesStr = startingPoint.split(" ");
-//                endCoordinatesStr = destinationPoint.split(" ");
 
                 new GetCoordinates().execute();
                 break;
@@ -227,18 +210,25 @@ public class MapFragment extends Fragment
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            PointsOfInterest startPoi = db.getPoi(startingPoint);
-            PointsOfInterest endPoi = db.getPoi(destinationPoint);
+            try {
+                PointsOfInterest startPoi = db.getPoi(startingPoint);
+                PointsOfInterest endPoi = db.getPoi(destinationPoint);
 
-            startingPoint = startPoi.getMlatitude() + "%2C" + startPoi.getMlongitude();
-            destinationPoint = endPoi.getMlatitude() + "%2C" + endPoi.getMlongitude();
-            mRouteUrl = mRouteUrl.replace("{a}", startingPoint);
-            mRouteUrl =  mRouteUrl.replace("{b}", destinationPoint);
+
+                startingPoint = startPoi.getMlatitude() + "%2C" + startPoi.getMlongitude();
+                destinationPoint = endPoi.getMlatitude() + "%2C" + endPoi.getMlongitude();
+                mRouteUrl = mRouteUrl.replace("{a}", startingPoint);
+                mRouteUrl =  mRouteUrl.replace("{b}", destinationPoint);
+            }catch(Exception e){
+                Toast.makeText(getContext(),
+                        "Invalid Entry.",
+                        Toast.LENGTH_SHORT).show();
+            }
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            contactList = new ArrayList<>();
+            coordinatesList = new ArrayList<>();
             HttpHandler sh = new HttpHandler();
 
             String jsonStr = sh.makeServiceCall(mRouteUrl);
@@ -262,14 +252,14 @@ public class MapFragment extends Fragment
                         double longitude = c.getDouble(0);
                         double latitude = c.getDouble(1);
 
-                        HashMap<String, Double> contact = new HashMap<>();
+                        HashMap<String, Double> coordinate = new HashMap<>();
 
                         //adding each child node to hashmap
-                        contact.put("long", longitude);
-                        contact.put("lat", latitude);
+                        coordinate.put("long", longitude);
+                        coordinate.put("lat", latitude);
 
                         //adding contact to contact list
-                        contactList.add(contact);
+                        coordinatesList.add(coordinate);
                     }
                 }catch (final JSONException e){
                     Log.e(TAG, "JSON parsing error: " + e.getMessage());
