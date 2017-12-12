@@ -357,7 +357,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 for (int i = 0; i < mPOIs.size(); i++) {
                     db.InsertPoi(mPOIs.get(i));
                 }
-                    mProgressBar2.setProgress(75);
+                    mProgressBar2.setProgress(85);
                     startMainActivity();
             }
 
@@ -387,7 +387,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             protected void onPostExecute(Void result){
                 getClasses();
-                mProgressBar2.setProgress(85);
+                mProgressBar2.setProgress(75);
                 }
 
         };

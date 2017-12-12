@@ -41,11 +41,11 @@ public class ProfileFragment extends Fragment {
         noItems = (TextView) view.findViewById(R.id.noItems_tv);
         noItems.setVisibility(noItems.GONE);
 
-        ArrayList<Classes> listContact = GetlistClasses();
-        if(listContact.isEmpty())
+        ArrayList<Classes> classList = GetlistClasses();
+        if(classList.isEmpty())
             noItems.setVisibility(noItems.VISIBLE);
         ListView lv = (ListView)view.findViewById(R.id.List1);
-        lv.setAdapter(new ClassAdapter(getActivity(), listContact));
+        lv.setAdapter(new ClassAdapter(getActivity(), classList));
 
 
         return view;
