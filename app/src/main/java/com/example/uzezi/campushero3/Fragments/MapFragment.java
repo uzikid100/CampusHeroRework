@@ -90,15 +90,11 @@ public class MapFragment extends Fragment
     //https://graphhopper.com/api/1/route?point=33.465017%2C-86.790308&point=33.465271%2C-86.793076&vehicle=foot&points_encoded=false&type=json&locale=de&key=e07736ac-c40a-4b8d-b566-57aa5a9f23ec
     private String startingPoint;
     private String destinationPoint;
-    private String[] srtCoordinatesStr;
-    private String[] endCoordinatesStr;
     private AutoCompleteTextView startTV;
     private AutoCompleteTextView endTV;
     private ArrayList<HashMap<String, Double>> contactList;
     private ImageButton searchButton;
     private DatabaseHelper db;
-
-
 
     private LocationRequest mLocationRequest;
     private Location mLastKnownLocation;
@@ -165,8 +161,8 @@ public class MapFragment extends Fragment
         mMap = googleMap;
         setMapSettings();
         //
-        MyUrlTileProvider mTileProvider = new MyUrlTileProvider(256, 256, mTileUrl);
-        mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mTileProvider)).setTransparency(0.5f);
+        //MyUrlTileProvider mTileProvider = new MyUrlTileProvider(256, 256, mTileUrl);
+        //mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mTileProvider)).setTransparency(0.5f);
         goToCurrentLocation();
 
         //TODO check if permission was granted or not
