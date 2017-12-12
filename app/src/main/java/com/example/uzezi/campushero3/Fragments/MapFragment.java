@@ -85,8 +85,6 @@ public class MapFragment extends Fragment
     private ImageButton searchButton;
     private DatabaseHelper db;
 
-
-
     private LocationRequest mLocationRequest;
     private Location mLastKnownLocation;
     private FusedLocationProviderApi mFusedLocationApi;
@@ -151,11 +149,9 @@ public class MapFragment extends Fragment
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         setMapSettings();
-        //
 //        MyUrlTileProvider mTileProvider = new MyUrlTileProvider(256, 256, mTileUrl);
 //        mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mTileProvider)).setTransparency(0.5f);
         goToCurrentLocation();
-
         //TODO check if permission was granted or not
     }
 
