@@ -350,10 +350,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 //if (!mClasses.isEmpty()) {
                     String id = db.getStudentId(studentId);
                     db.rebuildDB(mStudent.getId());
-                    if(id.length() == 0) {
                         db.InsertStudent(mStudent);
                         db.InsertClasses(mClasses);
-                    }
                 for (int i = 0; i < mPOIs.size(); i++) {
                     db.InsertPoi(mPOIs.get(i));
                 }
