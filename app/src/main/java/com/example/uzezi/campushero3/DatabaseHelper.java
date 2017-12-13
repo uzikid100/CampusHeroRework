@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private static final  int DATABASE_VERSION = 21;
+    private static final  int DATABASE_VERSION = 23;
 
     static final String dbName = "campushero";
 
@@ -120,12 +120,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public void rebuildDB(String studentId){
         SQLiteDatabase db = this.getReadableDatabase();
-        if(studentId != getFirstStudent().getId()){
+//        if(studentId != getFirstStudent().getId()){
             db.execSQL("DROP TABLE IF EXISTS "+student_Table);
             db.execSQL("DROP TABLE IF EXISTS "+class_Table);
             db.execSQL("DROP TABLE IF EXISTS "+poi_Table);
             onCreate(db);
-        }
+//        }
     }
 
     public void InsertStudent(Student student)
